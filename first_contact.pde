@@ -17,7 +17,7 @@ int gridWidth = 5;
 int gridHeight = 3;
 static int gridBoxSize = 133;
 ArrayList<PipeHolder> pipeHolders = new ArrayList<PipeHolder>();
-PImage background;
+PImage pipeGameBackground;
 PImage straightPipeUpDown;
 PImage straightPipeLeftRight;
 PImage[] straightPipeImages = new PImage[2];
@@ -29,29 +29,14 @@ boolean allowMouseClick = true;
 void setup()
 {
     size(1000, 600);
+    //Background images
     img1 = loadImage("Images/basement.png");
     img2 = loadImage("Factory1.png");
+
+    //Item images
     magnifier = loadImage("magnifier.png");
-    sceneManager = new SceneManager();
-    inventory = new Inventory(3, 100, 10);
-    glass = new Item(magnifier);
 
-    room1Scene = new Scene(img2);
-    initialScene = new Scene(img1);
-
-    room1Scene.addMoveButton(new PVector(200, 400), new PVector(64, 64), initialScene, magnifier, glass);
-    room1Scene.addMoveButton(new PVector(500, 400), new PVector(64, 64), magnifier, GameState.PipeGame);
-    initialScene.addMoveButton(new PVector(400, 600), new PVector(100, 120), room1Scene);
-
-    room1Scene.addItemButton(new PVector(400, 200), new PVector(32, 32), glass);
-    room1Scene.addItemButton(new PVector(300, 400), new PVector(32, 32), glass);
-    room1Scene.addItemButton(new PVector(600, 100), new PVector(32, 32), glass);
-    room1Scene.addItemButton(new PVector(700, 500), new PVector(32, 32), glass);
-    room1Scene.addItemButton(new PVector(771, 661), new PVector(32, 32), glass);
-
-    sceneManager.loadScene(initialScene);
-
-    //Pipe Game Images
+    //PipeGame images
     background = loadImage("pipeBackground.png");
     straightPipeImages[0] = loadImage("Pipe_Straight_UpDown.png");
     straightPipeImages[1] = loadImage("Pipe_Straight_LeftRight.png");
@@ -59,6 +44,33 @@ void setup()
     cornerPipeImages[1] = loadImage("Pipe_Corner_SouthWest.png");
     cornerPipeImages[2] = loadImage("Pipe_Corner_NorthEast.png");
     cornerPipeImages[3] = loadImage("Pipe_Corner_NorthWest.png");
+
+    //SceneManager initialization
+    sceneManager = new SceneManager();
+
+    //Inventory initializatiob
+    inventory = new Inventory(3, 100, 10);
+
+    //Item initialization
+    glass = new Item(magnifier);
+
+    //Scene initialization
+    room1Scene = new Scene(img2);
+    initialScene = new Scene(img1);
+
+    //Move button initialization
+    room1Scene.addMoveButton(new PVector(200, 400), new PVector(64, 64), initialScene, magnifier, glass);
+    room1Scene.addMoveButton(new PVector(500, 400), new PVector(64, 64), magnifier, GameState.PipeGame);
+    initialScene.addMoveButton(new PVector(400, 600), new PVector(100, 120), room1Scene);
+
+    //Item button initialization
+    room1Scene.addItemButton(new PVector(400, 200), new PVector(32, 32), glass);
+    room1Scene.addItemButton(new PVector(300, 400), new PVector(32, 32), glass);
+    room1Scene.addItemButton(new PVector(600, 100), new PVector(32, 32), glass);
+    room1Scene.addItemButton(new PVector(700, 500), new PVector(32, 32), glass);
+    room1Scene.addItemButton(new PVector(771, 661), new PVector(32, 32), glass);
+
+    sceneManager.loadScene(initialScene);
 
     //Pipe Game Init
     for(int rows = 0; rows < gridHeight; rows++)
@@ -94,6 +106,8 @@ void draw()
     if(gameState == GameState.PipeGame) {pipeGame();}
 }
 
+
+//Mouse click handling
 void mousePressed() 
 {
     if(allowMouseClick) sceneManager.mouseClick();
@@ -117,16 +131,18 @@ void mouseReleased()
     allowMouseClick = true;
 }
 
+//PxC gameloop
 void drawScenes()
 {
     sceneManager.draw();
     inventory.drawInventory();
 }
 
+//PipeGame gameloop
 void pipeGame()
 {
     background(0);
-    image(background, 0, 0, width, height);
+    image(pipeGameBackground, 0, 0, width, height);
     for(PipeHolder pHolder : pipeHolders)
     {
         pHolder.drawHolder();

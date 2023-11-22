@@ -8,6 +8,7 @@ class Scene
         background = pBackground;
     }
 
+    //Draws the scene and the buttons in the scene
     void drawScene()
     {
         image(background, 0, 0, width, height);
@@ -17,31 +18,37 @@ class Scene
         }
     }
 
+    //Basic move button
     void addMoveButton(PVector pPos, PVector pSize, Scene pScene)
     {
         sceneButtons.add(new MoveButton(pPos, pSize, pScene));
     }
 
+    //Move button with icon
     void addMoveButton(PVector pPos, PVector pSize, Scene pScene, PImage pIcon)
     {
         sceneButtons.add(new MoveButton(pPos, pSize, pScene, pIcon));
     }
 
+    //Move button with Item condition
     void addMoveButton(PVector pPos, PVector pSize, Scene pScene, PImage pIcon, Item pItem)
     {
         sceneButtons.add(new MoveButton(pPos, pSize, pScene, pIcon, pItem));
     }
 
+    //Move button with GameState change - use when changing to minigames
     void addMoveButton(PVector pPos, PVector pSize, PImage pIcon, GameState pGameState)
     {
         sceneButtons.add(new MoveButton(pPos, pSize, pIcon, pGameState));
     }
 
+    //Basic item button
     void addItemButton(PVector pPos, PVector pSize, Item pItem)
     {
         sceneButtons.add(new ItemButton(pPos, pSize, pItem, sceneButtons));
     }
 
+    //Checks for collision on all buttons in the Scene
     void checkButtonCollision()
     {
         for(Button button : sceneButtons)
