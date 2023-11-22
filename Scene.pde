@@ -32,6 +32,11 @@ class Scene
         sceneButtons.add(new MoveButton(pPos, pSize, pScene, pIcon, pItem));
     }
 
+    void addMoveButton(PVector pPos, PVector pSize, PImage pIcon, GameState pGameState)
+    {
+        sceneButtons.add(new MoveButton(pPos, pSize, pIcon, pGameState));
+    }
+
     void addItemButton(PVector pPos, PVector pSize, Item pItem)
     {
         sceneButtons.add(new ItemButton(pPos, pSize, pItem, sceneButtons));

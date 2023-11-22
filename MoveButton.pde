@@ -1,5 +1,6 @@
 class MoveButton extends Button
 {
+    GameState nextGameState;
     ButtonType buttonType;
     Scene sceneToMove;
     PImage buttonIcon;
@@ -29,6 +30,14 @@ class MoveButton extends Button
         requieredItem = pItem;
     }
 
+    MoveButton(PVector pPos, PVector pSize, PImage pIcon, GameState pGameState)
+    {
+        buttonPosition = pPos;
+        buttonSize = pSize;
+        buttonIcon = pIcon;
+        nextGameState = pGameState;
+    }
+
     void drawButton()
     {
         strokeWeight(0);
@@ -51,6 +60,10 @@ class MoveButton extends Button
             {
                 println("missing item");
             }
+        }
+        else if(nextGameState != null)
+        {
+            gameState = nextGameState;
         }
         else
         {
