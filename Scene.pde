@@ -2,6 +2,8 @@ class Scene
 {
     PImage background;
     ArrayList<Button> sceneButtons = new ArrayList<Button>();
+    ArrayList<TextBox> sceneTexts = new ArrayList<TextBox>();
+    boolean isTextBeingRendered = false;
 
     Scene(PImage pBackground)
     {
@@ -15,6 +17,10 @@ class Scene
         for(Button button : sceneButtons)
         {
             button.drawButton();
+        }
+        for(TextBox textBox : sceneTexts)
+        {
+            if(textBox.renderText) {textBox.drawTextBox();}
         }
     }
 
@@ -48,15 +54,44 @@ class Scene
         sceneButtons.add(new ItemButton(pPos, pSize, pItem, sceneButtons));
     }
 
+    //Basic text button
+    void addTextButton(PVector pPos, PVector pSize, PImage pIcon, TextBox pText)
+    {
+        sceneButtons.add(new TextButton(pPos, pSize, pIcon, pText));
+    }
+
+    //Basic text box
+    TextBox createTextBox(String pText)
+    {
+        TextBox tempTextBox = new TextBox(pText, this);
+        sceneTexts.add(tempTextBox);
+        return tempTextBox;
+    }
+
     //Checks for collision on all buttons in the Scene
     void checkButtonCollision()
     {
-        for(Button button : sceneButtons)
+        if(isTextBeingRendered) 
         {
-            if(mouseX < button.buttonPosition.x + button.buttonSize.x/2 && mouseX > button.buttonPosition.x - button.buttonSize.x/2 && mouseY < button.buttonPosition.y + button.buttonSize.y/2 && mouseY > button.buttonPosition.y - button.buttonSize.y/2)
+            isTextBeingRendered = false;
+            for(TextBox textBox : sceneTexts)
             {
-                button.buttonAction();
-                break;
+                if(textBox.renderText)
+                {
+                    textBox.toggleRender();
+                    break;
+                }
+            }
+        }
+        else 
+        {
+            for(Button button : sceneButtons)
+            {
+                if(mouseX < button.buttonPosition.x + button.buttonSize.x/2 && mouseX > button.buttonPosition.x - button.buttonSize.x/2 && mouseY < button.buttonPosition.y + button.buttonSize.y/2 && mouseY > button.buttonPosition.y - button.buttonSize.y/2)
+                {
+                    button.buttonAction();
+                    break;
+                }
             }
         }
     }

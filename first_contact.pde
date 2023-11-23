@@ -4,13 +4,16 @@ enum GameState{Scenes, PipeGame, JarGame, CookGame, MainMenu};
 GameState gameState = GameState.Scenes;
 SceneManager sceneManager;
 Scene currentScene;
-Scene initialScene;
-Scene room1Scene;
-PImage img1;
-PImage img2;
+Scene basementScene;
+Scene hallwayScene;
+Scene kitchenScene;
+PImage basementBackground;
+PImage hallwayBackground;
+PImage kitchenBackground;
 PImage magnifier;
 Inventory inventory;
 Item glass;
+TextBox hallwayWoodBeam;
 
 //Pipe Game Variables
 int gridWidth = 5;
@@ -26,18 +29,22 @@ PImage[] cornerPipeImages = new PImage[4];
 //Universal Variables
 boolean allowMouseClick = true;
 
+//String Variables
+String blockedWay = "The pathway to the top floor seems to be blocked by a huge wooden beam!";
+
 void setup()
 {
     size(1000, 600);
     //Background images
-    img1 = loadImage("Images/basement.png");
-    img2 = loadImage("Factory1.png");
+    basementBackground = loadImage("basementBackground.png");
+    hallwayBackground = loadImage("hallwayBackground.png");
+    kitchenBackground = loadImage("kitchenBackground.png");
 
     //Item images
     magnifier = loadImage("magnifier.png");
 
     //PipeGame images
-    background = loadImage("pipeBackground.png");
+    pipeGameBackground = loadImage("pipeBackground.png");
     straightPipeImages[0] = loadImage("Pipe_Straight_UpDown.png");
     straightPipeImages[1] = loadImage("Pipe_Straight_LeftRight.png");
     cornerPipeImages[0] = loadImage("Pipe_Corner_SouthEast.png");
@@ -55,24 +62,29 @@ void setup()
     glass = new Item(magnifier);
 
     //Scene initialization
-    room1Scene = new Scene(img2);
-    initialScene = new Scene(img1);
+    basementScene = new Scene(basementBackground);
+    hallwayScene = new Scene(hallwayBackground);
+    kitchenScene = new Scene(kitchenBackground);
+
+    //TextBox initialization
+    hallwayWoodBeam = hallwayScene.createTextBox(blockedWay);
 
     //Move button initialization
-    room1Scene.addMoveButton(new PVector(200, 400), new PVector(64, 64), initialScene, magnifier, glass);
-    room1Scene.addMoveButton(new PVector(500, 400), new PVector(64, 64), magnifier, GameState.PipeGame);
-    initialScene.addMoveButton(new PVector(400, 600), new PVector(100, 120), room1Scene);
+    basementScene.addMoveButton(new PVector(270, 175), new PVector(64, 64), hallwayScene, magnifier);
+    hallwayScene.addMoveButton(new PVector(490, 530), new PVector(64, 64), basementScene, magnifier);
+    hallwayScene.addMoveButton(new PVector(775, 320), new PVector(64, 64), kitchenScene, magnifier);
+    kitchenScene.addMoveButton(new PVector(100, 400), new PVector(64, 64), hallwayScene, magnifier);
+    
 
     //Item button initialization
-    room1Scene.addItemButton(new PVector(400, 200), new PVector(32, 32), glass);
-    room1Scene.addItemButton(new PVector(300, 400), new PVector(32, 32), glass);
-    room1Scene.addItemButton(new PVector(600, 100), new PVector(32, 32), glass);
-    room1Scene.addItemButton(new PVector(700, 500), new PVector(32, 32), glass);
-    room1Scene.addItemButton(new PVector(771, 661), new PVector(32, 32), glass);
 
-    sceneManager.loadScene(initialScene);
+    //Text button initialization
+    hallwayScene.addTextButton(new PVector(270, 250), new PVector(64, 64), magnifier, hallwayWoodBeam);
 
-    //Pipe Game Init
+    //Load first scene
+    sceneManager.loadScene(basementScene);
+
+    //Pipe Game initialization
     for(int rows = 0; rows < gridHeight; rows++)
     {
         int yPos = 170 + (gridBoxSize * rows);
@@ -120,10 +132,10 @@ void mousePressed()
             {
                 pH.heldPipe.rotatePipe();
             }
-            
         }
     }
     allowMouseClick = false;
+    println("x: " + mouseX + " | " + "y: " + mouseY);
 }
 
 void mouseReleased()
