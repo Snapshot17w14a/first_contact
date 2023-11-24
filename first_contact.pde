@@ -1,39 +1,83 @@
+enum GameState{Scenes, PipeGame, JarGame, CookGame, MainMenu};
+
+//Framework Variables
+GameState gameState = GameState.Scenes;
 SceneManager sceneManager;
 Scene currentScene;
-Scene initialScene;
-Scene room1Scene;
-PImage img1;
-PImage img2;
+Scene basementScene;
+Scene hallwayScene;
+Scene kitchenScene;
+Scene storageScene;
+PImage basementBackground;
+PImage hallwayBackground;
+PImage kitchenBackground;
+PImage storageBackground;
 PImage magnifier;
 Inventory inventory;
 Item glass;
+TextBox hallwayWoodBeam;
 
+//Pipe Game Variables
+int gridWidth = 5;
+int gridHeight = 3;
+int usedLayout;
+static int gridBoxSize = 133;
+ArrayList<PipeHolder> pipeHolders = new ArrayList<PipeHolder>();
+PImage pipeGameBackground;
+PImage straightPipeUpDown;
+PImage straightPipeLeftRight;
+PImage[] straightPipeImages = new PImage[2];
+PImage[] cornerPipeImages = new PImage[4];
+int[][] pipeLayouts = {{1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0}, {0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1}};
+int[][] pipeSolutions = {{5, 1, -1, 0, 1, -1, 4, 0, 2, 4, -1, 3, 2, -1, 3}, {1, 0, 5, 5, 1, 4, 4, -1, 0, 2, 3, 2, -1, 3, 5}};
+int[] correctCountAmount = {11, 13};
+
+//Universal Variables
 boolean allowMouseClick = true;
 
-void setup() 
+//String Variables
+String blockedWay = "The pathway to the top floor seems to be blocked by a huge wooden beam!";
+
+void setup()
 {
-    size(800, 800);
-    img1 = loadImage("testBackground.jpg");
-    img2 = loadImage("Factory1.png");
+    size(1000, 600);
+    //Background images
+    basementBackground = loadImage("basementBackground.png");
+    hallwayBackground = loadImage("hallwayBackground.png");
+    kitchenBackground = loadImage("kitchenBackground.png");
+    storageBackground = loadImage("storageBackground.png");
+
+    //Item images
     magnifier = loadImage("magnifier.png");
+
+    //PipeGame images
+    pipeGameBackground = loadImage("pipeBackground.png");
+    straightPipeImages[0] = loadImage("Pipe_Straight_UpDown.png");
+    straightPipeImages[1] = loadImage("Pipe_Straight_LeftRight.png");
+    cornerPipeImages[0] = loadImage("Pipe_Corner_SouthEast.png");
+    cornerPipeImages[1] = loadImage("Pipe_Corner_SouthWest.png");
+    cornerPipeImages[2] = loadImage("Pipe_Corner_NorthEast.png");
+    cornerPipeImages[3] = loadImage("Pipe_Corner_NorthWest.png");
+
+    //SceneManager initialization
     sceneManager = new SceneManager();
+
+    //Inventory initializatiob
     inventory = new Inventory(3, 100, 10);
+
+    //Item initialization
     glass = new Item(magnifier);
 
-    room1Scene = new Scene(img2);
-    initialScene = new Scene(img1);
+    //Scene initialization
+    basementScene = new Scene(basementBackground);
+    hallwayScene = new Scene(hallwayBackground);
+    kitchenScene = new Scene(kitchenBackground);
+    storageScene = new Scene(storageBackground);
 
-    room1Scene.addMoveButton(new PVector(200, 400), new PVector(64, 64), initialScene, magnifier, glass);
-    initialScene.addMoveButton(new PVector(400, 600), new PVector(100, 120), room1Scene);
 
-    room1Scene.addItemButton(new PVector(400, 200), new PVector(32, 32), glass);
-    room1Scene.addItemButton(new PVector(300, 400), new PVector(32, 32), glass);
-    room1Scene.addItemButton(new PVector(600, 100), new PVector(32, 32), glass);
-    room1Scene.addItemButton(new PVector(700, 500), new PVector(32, 32), glass);
+    //TextBox initialization
+    hallwayWoodBeam = hallwayScene.createTextBox(blockedWay);
 
-<<<<<<< Updated upstream
-    sceneManager.loadScene(initialScene);
-=======
     //Move button initialization
     basementScene.addMoveButton(new PVector(270, 175), new PVector(64, 64), hallwayScene, magnifier);
     basementScene.addMoveButton(new PVector(570, 215), new PVector(64, 64), magnifier, GameState.PipeGame);
@@ -41,7 +85,6 @@ void setup()
     hallwayScene.addMoveButton(new PVector(775, 320), new PVector(64, 64), kitchenScene, magnifier);
     hallwayScene.addMoveButton(new PVector(430, 290), new PVector(64, 64), storageScene, magnifier);
     kitchenScene.addMoveButton(new PVector(100, 400), new PVector(64, 64), hallwayScene, magnifier);
-    storageScene.addMoveButton(new PVector(width/2, 550), new PVector(64, 64), hallwayScene, magnifier);
 
     //Item button initialization
 
@@ -76,23 +119,69 @@ void setup()
                 break;
         }
     }
->>>>>>> Stashed changes
 }
 
 void draw() 
 {
     background(0);
-    sceneManager.draw();
-    inventory.drawInventory();
+    if(gameState == GameState.Scenes) {drawScenes();}
+    if(gameState == GameState.PipeGame) {pipeGame();}
 }
 
+
+//Mouse click handling
 void mousePressed() 
 {
     if(allowMouseClick) sceneManager.mouseClick();
+    if(allowMouseClick)
+    {
+        allowMouseClick = false;
+        for(PipeHolder pH : pipeHolders)
+        {
+            if(pH.isOverHeldPipe())
+            {
+                pH.heldPipe.rotatePipe();
+            }
+        }
+    }
     allowMouseClick = false;
+    println("x: " + mouseX + " | " + "y: " + mouseY);
 }
 
 void mouseReleased()
 {
     allowMouseClick = true;
+}
+
+//PxC gameloop
+void drawScenes()
+{
+    sceneManager.draw();
+    inventory.drawInventory();
+}
+
+//PipeGame gameloop
+void pipeGame()
+{
+    int correctCount = 0;
+    background(0);
+    image(pipeGameBackground, 0, 0, width, height);
+    for(PipeHolder pHolder : pipeHolders)
+    {
+        pHolder.drawHolder();
+    }
+    for(int i = 0; i < pipeHolders.size(); i++)
+    {
+        PipeHolder pHolder = pipeHolders.get(i);
+        if(pipeSolutions[usedLayout][i] != -1 && pipeSolutions[usedLayout][i] == pHolder.heldPipe.pipeRotationNum)
+        {
+            correctCount++;
+        }
+    }
+    if(correctCount == correctCountAmount[usedLayout])
+    {
+        sceneManager.loadScene(basementScene);
+        gameState = GameState.Scenes;
+        basementScene.sceneButtons.remove(1);
+    }
 }
