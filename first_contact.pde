@@ -23,7 +23,7 @@ Item cookKey;
 Item jarKey;
 TextBox hallwayWoodBeam;
 
-//Pipe Game Variables
+//PipeGame Variables
 int gridWidth = 5;
 int gridHeight = 3;
 int usedLayout;
@@ -37,6 +37,19 @@ PImage[] cornerPipeImages = new PImage[4];
 int[][] pipeLayouts = {{1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0}, {0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1}};
 int[][] pipeSolutions = {{5, 1, -1, 0, 1, -1, 4, 0, 2, 4, -1, 3, 2, -1, 3}, {1, 0, 5, 5, 1, 4, 4, -1, 0, 2, 3, 2, -1, 3, 5}};
 int[] correctCountAmount = {11, 13};
+
+//JarGame Variables
+int jarCount = 5;
+Jar[] correctJarOrder;
+Jar[] randomJarOrder;
+Jar selectedJar;
+boolean allowClick = true;
+boolean isJarAvailable = false;
+JarButton moveLeft;
+JarButton moveRight;
+PImage jarArrowLeft;
+PImage jarArrowRight;
+PImage jarImage;
 
 //Universal Variables
 boolean allowMouseClick = true;
@@ -98,8 +111,10 @@ void setup()
     hallwayScene.addExitButton(new PVector(550, 245), new PVector(64, 64), keyImage, winScene);
     kitchenScene.addMoveButton(new PVector(100, 400), new PVector(64, 64), hallwayScene, magnifier);
     storageScene.addMoveButton(new PVector(width/2, 550), new PVector(64, 64), hallwayScene, magnifier);
+    storageScene.addMoveButton(new PVector(265, 300), new PVector(64, 64), magnifier, GameState.JarGame);
 
     //Item button initialization
+    kitchenScene.addItemButton(new PVector(510, 200), new PVector(64, 64), cookKey);
 
     //Text button initialization
     hallwayScene.addTextButton(new PVector(270, 250), new PVector(64, 64), magnifier, hallwayWoodBeam);
@@ -132,6 +147,24 @@ void setup()
                 break;
         }
     }
+
+    //JarGame Initialization
+    jarArrowLeft = loadImage("left_arrow.png");
+    jarArrowRight = loadImage("right_arrow.png");
+    jarImage = loadImage("jar.png");
+    correctJarOrder = new Jar[jarCount];
+    randomJarOrder = new Jar[jarCount];
+    for(int i = 0; i < jarCount; i++)
+    {
+        correctJarOrder[i] = new Jar(new PVector(100, 200 + (i * 10)), i, jarImage);
+    }
+    for(int i = 0; i < jarCount; i++)
+    {
+        scrambleJars(i);
+    }
+    moveRight = new JarButton(jarArrowRight, new PVector(700, 500));
+    moveLeft = new JarButton(jarArrowLeft, new PVector(300, 500));
+    selectedJar = null;
 }
 
 void draw() 
@@ -139,20 +172,20 @@ void draw()
     background(0);
     if(gameState == GameState.Scenes) {drawScenes();}
     if(gameState == GameState.PipeGame) {pipeGame();}
+    if(gameState == GameState.JarGame) {jarGame();}
 }
-
 
 //Mouse click handling
 void mousePressed() 
 {
-    switch(gameState)
+    if(allowMouseClick)
     {
-        case Scenes:
-            if(allowMouseClick) sceneManager.mouseClick();
-            break;
-        case PipeGame:
-            if(allowMouseClick)
-            {
+        switch(gameState)
+        {
+            case Scenes:
+                sceneManager.mouseClick();
+                break;
+            case PipeGame:
                 allowMouseClick = false;
                 for(PipeHolder pH : pipeHolders)
                 {
@@ -161,8 +194,24 @@ void mousePressed()
                         pH.heldPipe.rotatePipe();
                     }
                 }
-            }
-            break;
+                break;
+            case JarGame:
+                if(isJarAvailable && moveRight.isOverJarButton()) {moveRight.moveRight(selectedJar.jarPosition);}
+                else if(isJarAvailable && moveLeft.isOverJarButton()) {moveLeft.moveLeft(selectedJar.jarPosition);}
+                else if(isJarAvailable) {selectedJar.isJarSelected = false; selectedJar = null;}
+                else 
+                {
+                    for(Jar jar : correctJarOrder)
+                    {
+                        if(jar.isOverJar())
+                        {
+                            selectedJar = jar;
+                            jar.isJarSelected = true;
+                        }
+                    }
+                }
+                break;
+        }
     }
     allowMouseClick = false;
     println("x: " + mouseX + " | " + "y: " + mouseY);
@@ -204,4 +253,47 @@ void pipeGame()
         basementScene.sceneButtons.remove(1);
         inventory.heldItems.add(pipeKey);
     }
+}
+
+//JarGame gameloop
+void jarGame()
+{
+    background(128);
+    for(Jar jar : correctJarOrder)
+    {
+        jar.drawJar();
+    }
+    if(selectedJar != null)
+    {
+        isJarAvailable = true;
+        moveRight.drawArrow();
+        moveLeft.drawArrow();
+    }
+    else
+    {
+        isJarAvailable = false;
+    }
+    int correctCount = 0;
+    for(Jar jar : correctJarOrder)
+    {
+        if(jar.isInCorrectSpot == true) correctCount++;
+    }
+    textAlign(CENTER, CENTER);
+    if(correctCount == 5)
+    {
+        sceneManager.loadScene(storageScene);
+        gameState = GameState.Scenes;
+        storageScene.sceneButtons.remove(1);
+        inventory.heldItems.add(jarKey);
+    }
+}
+
+void scrambleJars(int index)
+{
+    int correctArrayIndex = index;
+    int randomArrayIndex;
+    do{randomArrayIndex = (int)(random(0, jarCount));}
+    while(randomJarOrder[randomArrayIndex] != null);
+    randomJarOrder[randomArrayIndex] = correctJarOrder[correctArrayIndex];
+    randomJarOrder[randomArrayIndex].jarPosition = randomArrayIndex;
 }

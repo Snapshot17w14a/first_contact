@@ -40,7 +40,7 @@ Item cookKey;
 Item jarKey;
 TextBox hallwayWoodBeam;
 
-//Pipe Game Variables
+//PipeGame Variables
 int gridWidth = 5;
 int gridHeight = 3;
 int usedLayout;
@@ -54,6 +54,19 @@ PImage[] cornerPipeImages = new PImage[4];
 int[][] pipeLayouts = {{1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0}, {0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1}};
 int[][] pipeSolutions = {{5, 1, -1, 0, 1, -1, 4, 0, 2, 4, -1, 3, 2, -1, 3}, {1, 0, 5, 5, 1, 4, 4, -1, 0, 2, 3, 2, -1, 3, 5}};
 int[] correctCountAmount = {11, 13};
+
+//JarGame Variables
+int jarCount = 5;
+Jar[] correctJarOrder;
+Jar[] randomJarOrder;
+Jar selectedJar;
+boolean allowClick = true;
+boolean isJarAvailable = false;
+JarButton moveLeft;
+JarButton moveRight;
+PImage jarArrowLeft;
+PImage jarArrowRight;
+PImage jarImage;
 
 //Universal Variables
 boolean allowMouseClick = true;
@@ -115,8 +128,10 @@ public void setup()
     hallwayScene.addExitButton(new PVector(550, 245), new PVector(64, 64), keyImage, winScene);
     kitchenScene.addMoveButton(new PVector(100, 400), new PVector(64, 64), hallwayScene, magnifier);
     storageScene.addMoveButton(new PVector(width/2, 550), new PVector(64, 64), hallwayScene, magnifier);
+    storageScene.addMoveButton(new PVector(265, 300), new PVector(64, 64), magnifier, GameState.JarGame);
 
     //Item button initialization
+    kitchenScene.addItemButton(new PVector(510, 200), new PVector(64, 64), cookKey);
 
     //Text button initialization
     hallwayScene.addTextButton(new PVector(270, 250), new PVector(64, 64), magnifier, hallwayWoodBeam);
@@ -149,6 +164,24 @@ public void setup()
                 break;
         }
     }
+
+    //JarGame Initialization
+    jarArrowLeft = loadImage("left_arrow.png");
+    jarArrowRight = loadImage("right_arrow.png");
+    jarImage = loadImage("jar.png");
+    correctJarOrder = new Jar[jarCount];
+    randomJarOrder = new Jar[jarCount];
+    for(int i = 0; i < jarCount; i++)
+    {
+        correctJarOrder[i] = new Jar(new PVector(100, 200 + (i * 10)), i, jarImage);
+    }
+    for(int i = 0; i < jarCount; i++)
+    {
+        scrambleJars(i);
+    }
+    moveRight = new JarButton(jarArrowRight, new PVector(700, 500));
+    moveLeft = new JarButton(jarArrowLeft, new PVector(300, 500));
+    selectedJar = null;
 }
 
 public void draw() 
@@ -156,20 +189,20 @@ public void draw()
     background(0);
     if(gameState == GameState.Scenes) {drawScenes();}
     if(gameState == GameState.PipeGame) {pipeGame();}
+    if(gameState == GameState.JarGame) {jarGame();}
 }
-
 
 //Mouse click handling
 public void mousePressed() 
 {
-    switch(gameState)
+    if(allowMouseClick)
     {
-        case Scenes:
-            if(allowMouseClick) sceneManager.mouseClick();
-            break;
-        case PipeGame:
-            if(allowMouseClick)
-            {
+        switch(gameState)
+        {
+            case Scenes:
+                sceneManager.mouseClick();
+                break;
+            case PipeGame:
                 allowMouseClick = false;
                 for(PipeHolder pH : pipeHolders)
                 {
@@ -178,8 +211,24 @@ public void mousePressed()
                         pH.heldPipe.rotatePipe();
                     }
                 }
-            }
-            break;
+                break;
+            case JarGame:
+                if(isJarAvailable && moveRight.isOverJarButton()) {moveRight.moveRight(selectedJar.jarPosition);}
+                else if(isJarAvailable && moveLeft.isOverJarButton()) {moveLeft.moveLeft(selectedJar.jarPosition);}
+                else if(isJarAvailable) {selectedJar.isJarSelected = false; selectedJar = null;}
+                else 
+                {
+                    for(Jar jar : correctJarOrder)
+                    {
+                        if(jar.isOverJar())
+                        {
+                            selectedJar = jar;
+                            jar.isJarSelected = true;
+                        }
+                    }
+                }
+                break;
+        }
     }
     allowMouseClick = false;
     println("x: " + mouseX + " | " + "y: " + mouseY);
@@ -221,6 +270,49 @@ public void pipeGame()
         basementScene.sceneButtons.remove(1);
         inventory.heldItems.add(pipeKey);
     }
+}
+
+//JarGame gameloop
+public void jarGame()
+{
+    background(128);
+    for(Jar jar : correctJarOrder)
+    {
+        jar.drawJar();
+    }
+    if(selectedJar != null)
+    {
+        isJarAvailable = true;
+        moveRight.drawArrow();
+        moveLeft.drawArrow();
+    }
+    else
+    {
+        isJarAvailable = false;
+    }
+    int correctCount = 0;
+    for(Jar jar : correctJarOrder)
+    {
+        if(jar.isInCorrectSpot == true) correctCount++;
+    }
+    textAlign(CENTER, CENTER);
+    if(correctCount == 5)
+    {
+        sceneManager.loadScene(storageScene);
+        gameState = GameState.Scenes;
+        storageScene.sceneButtons.remove(1);
+        inventory.heldItems.add(jarKey);
+    }
+}
+
+public void scrambleJars(int index)
+{
+    int correctArrayIndex = index;
+    int randomArrayIndex;
+    do{randomArrayIndex = (int)(random(0, jarCount));}
+    while(randomJarOrder[randomArrayIndex] != null);
+    randomJarOrder[randomArrayIndex] = correctJarOrder[correctArrayIndex];
+    randomJarOrder[randomArrayIndex].jarPosition = randomArrayIndex;
 }
 enum ButtonType{Item, Move}
 
@@ -443,6 +535,95 @@ class ItemButton extends Button
         strokeWeight(12);
         fill(255, 255, 255, 255);
         image(buttonItem.itemImage, buttonPosition.x - buttonSize.x/2, buttonPosition.y - buttonSize.y/2, buttonSize.x, buttonSize.y);
+    }
+}
+class Jar
+{
+    int indexInArray;
+    int jarPosition;
+    PVector jarSize;
+    PVector position;
+    PImage jarIcon;
+    boolean isJarSelected;
+    boolean isInCorrectSpot;
+    Jar(PVector pSize, int pIndex, PImage pIcon)
+    {
+        jarSize = pSize;
+        indexInArray = pIndex;
+        jarIcon = pIcon;
+        position = new PVector(0, 0);
+    }
+
+    public void drawJar()
+    {
+        position.x = jarPosition * 100 + (jarPosition * 50) + 200;
+        position.y = height/2 - (indexInArray * 10)/2;
+        fill(255, 255, 255, 255);
+        imageMode(CENTER);
+        image(jarIcon, position.x, position.y, jarSize.x, jarSize.y);
+        fill(0);
+        if(jarPosition == indexInArray) isInCorrectSpot = true;
+        else isInCorrectSpot = false;
+    }
+
+    public boolean isOverJar()
+    {
+        return mouseX < position.x + jarSize.x/2 && mouseX > position.x - jarSize.x/2 && mouseY < position.y + jarSize.y/2 && mouseY > position.y - jarSize.y/2;
+    }
+}
+class JarButton
+{
+    PImage arrow;
+    PVector position;
+    JarButton(PImage pImage, PVector pPos)
+    {
+        arrow = pImage;
+        position = pPos;
+    }
+
+    public void moveRight(int toMoveIndex)
+    {
+        if(toMoveIndex == 4)
+        {
+            println("cannot move");
+        }
+        else
+        {
+            Jar jar1 = randomJarOrder[toMoveIndex];
+            Jar jar2 = randomJarOrder[toMoveIndex + 1];
+            randomJarOrder[toMoveIndex] = jar2;
+            randomJarOrder[toMoveIndex + 1] = jar1;
+            jar1.jarPosition = toMoveIndex + 1;
+            jar2.jarPosition = toMoveIndex;
+        }
+    }
+
+    public void moveLeft(int toMoveIndex)
+    {
+        if(toMoveIndex == 0)
+        {
+            println("cannot move");
+        }
+        else
+        {
+            Jar jar1 = randomJarOrder[toMoveIndex];
+            Jar jar2 = randomJarOrder[toMoveIndex - 1];
+            randomJarOrder[toMoveIndex] = jar2;
+            randomJarOrder[toMoveIndex - 1] = jar1;
+            jar1.jarPosition = toMoveIndex - 1;
+            jar2.jarPosition = toMoveIndex;
+        }
+    }
+
+    public void drawArrow()
+    {
+        imageMode(CORNER);
+        image(arrow, position.x - 32, position.y - 32, 64, 64);
+    }
+
+    public boolean isOverJarButton()
+    {
+        return mouseX < position.x + 32 && mouseX > position.x - 32 && mouseY < position.y + 32 && mouseY > position.y - 32;
     }
 }
 class MoveButton extends Button
