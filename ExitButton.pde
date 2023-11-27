@@ -23,7 +23,8 @@ class ExitButton extends Button
         if(exit) 
         {
             allowExit(true);
-            sceneManager.loadScene(exitScene);
+            gameState = GameState.WinMenu;
+            isWinMenu = true;
         }
     }
 

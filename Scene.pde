@@ -13,6 +13,7 @@ class Scene
     //Draws the scene and the buttons in the scene
     void drawScene()
     {
+        imageMode(CORNER);
         image(background, 0, 0, width, height);
         for(Button button : sceneButtons)
         {

@@ -45,6 +45,7 @@ class MoveButton extends Button
         fill(255, 255, 255, 0);
         rect(buttonPosition.x, buttonPosition.y, buttonSize.x, buttonSize.y);
         fill(255, 255, 255, 255);
+        imageMode(CORNER);
         if(buttonIcon != null) image(buttonIcon, buttonPosition.x - buttonSize.x/2, buttonPosition.y - buttonSize.y/2, 64, 64);
     }
 

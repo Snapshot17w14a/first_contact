@@ -1,7 +1,7 @@
-enum GameState{Scenes, PipeGame, JarGame, CookGame, MainMenu};
+enum GameState{Scenes, PipeGame, JarGame, CookGame, MainMenu, WinMenu};
 
 //Framework Variables
-GameState gameState = GameState.Scenes;
+GameState gameState = GameState.MainMenu;
 SceneManager sceneManager;
 Scene currentScene;
 Scene basementScene;
@@ -14,6 +14,7 @@ PImage hallwayBackground;
 PImage kitchenBackground;
 PImage storageBackground;
 PImage winBackground;
+PImage mainMenuBackground;
 PImage magnifier;
 PImage keyImage;
 Inventory inventory;
@@ -22,6 +23,8 @@ Item pipeKey;
 Item cookKey;
 Item jarKey;
 TextBox hallwayWoodBeam;
+boolean isHowToPlay = false;
+boolean isWinMenu = false;
 
 //PipeGame Variables
 int gridWidth = 5;
@@ -53,6 +56,15 @@ PImage jarImage;
 
 //Universal Variables
 boolean allowMouseClick = true;
+PFont baseFont;
+PFont titleFont;
+
+//Menu Variables
+PVector playButtonPosition = new PVector(715, 400);
+PVector howToButtonPosition = new PVector(750, 490);
+PVector backButtonPosition = new PVector(900, 540);
+PVector mainmenuButtonPosition = new PVector(400, 550);
+PVector quitButtonPosition = new PVector(600, 550);
 
 //String Variables
 String blockedWay = "The pathway to the top floor seems to be blocked by a huge wooden beam!";
@@ -60,11 +72,16 @@ String blockedWay = "The pathway to the top floor seems to be blocked by a huge 
 void setup()
 {
     size(1000, 600);
+    //Load fonts
+    baseFont = createFont("monbaiti.ttf", 24);
+    titleFont = createFont("lucindablack.ttf", 96);
+    
     //Background images
     basementBackground = loadImage("basementBackground.png");
     hallwayBackground = loadImage("hallwayBackground.png");
     kitchenBackground = loadImage("kitchenBackground.png");
     storageBackground = loadImage("storageBackground.png");
+    mainMenuBackground = loadImage("mainMenu.png");
     winBackground = loadImage("Factory1.png");
 
     //Item images
@@ -132,7 +149,6 @@ void setup()
             pipeHolders.add(new PipeHolder(new PVector(xPos, yPos)));
         }
     }
-    PipeHolder ph = pipeHolders.get(0);
     usedLayout = (int)(random(0, 2));
     for(int i = 0; i < pipeHolders.size(); i++)
     {
@@ -170,9 +186,11 @@ void setup()
 void draw() 
 {
     background(0);
-    if(gameState == GameState.Scenes) {drawScenes();}
-    if(gameState == GameState.PipeGame) {pipeGame();}
-    if(gameState == GameState.JarGame) {jarGame();}
+    if(gameState == GameState.Scenes) {drawScenes(); return;}
+    if(gameState == GameState.PipeGame) {pipeGame(); return;}
+    if(gameState == GameState.JarGame) {jarGame(); return;}
+    if(gameState == GameState.MainMenu) {mainMenu(); return;}
+    if(gameState == GameState.WinMenu) {winMenu(); return;}
 }
 
 //Mouse click handling
@@ -210,6 +228,10 @@ void mousePressed()
                         }
                     }
                 }
+                break;
+            case MainMenu:
+            case WinMenu:
+                checkMenuClick();
                 break;
         }
     }
@@ -296,4 +318,129 @@ void scrambleJars(int index)
     while(randomJarOrder[randomArrayIndex] != null);
     randomJarOrder[randomArrayIndex] = correctJarOrder[correctArrayIndex];
     randomJarOrder[randomArrayIndex].jarPosition = randomArrayIndex;
+}
+
+//Main Menu logic
+void mainMenu()
+{
+    imageMode(CENTER);
+    background(mainMenuBackground);
+    strokeWeight(2);
+    fill(#ff0000);
+    rectMode(CENTER);
+    if(!isHowToPlay)
+    {
+        rect(playButtonPosition.x, playButtonPosition.y, 250, 70, 10);
+        fill(#00ff00);
+        rect(howToButtonPosition.x, howToButtonPosition.y, 150, 50, 5);
+        textAlign(CENTER, CENTER);
+        textFont(baseFont, 36);
+        fill(#000000);
+        text("Play", playButtonPosition.x, playButtonPosition.y);
+        textFont(baseFont, 24);
+        text("How to play", howToButtonPosition.x, howToButtonPosition.y);
+        textAlign(LEFT, CENTER);
+        textFont(titleFont, 94);
+        text("Phantom Liberation", 20, 160);
+        fill(#ff0000);
+        text("Phantom Liberation", 16, 156);
+    }
+    else
+    {
+        rect(backButtonPosition.x, backButtonPosition.y, 100, 50, 5);
+        fill(#000000);
+        textAlign(CENTER, CENTER);
+        textFont(baseFont, 24);
+        text("Back", backButtonPosition.x, backButtonPosition.y);
+        textAlign(LEFT, CENTER);
+        textFont(titleFont, 36);
+        text("Phantom Liberation", 20, 40);
+        fill(#ff0000);
+        text("Phantom Liberation", 18, 38);
+        fill(128, 128, 128, 196);
+        rect(width/2, height/2, 900, 400);
+        textAlign(LEFT, TOP);
+        fill(0);
+        textFont(baseFont, 24);
+        text("do puzzles, get keys and escape", width/2, height/2, 890, 390);
+    }
+}
+
+void checkMenuClick()
+{
+    if(isHowToPlay && mouseX < backButtonPosition.x + 100/2 && mouseX > backButtonPosition.x - 100/2 && mouseY < backButtonPosition.y + 50/2 && mouseY > backButtonPosition.y - 50/2)
+    {
+        isHowToPlay = false;
+    }
+    if(!isHowToPlay && mouseX < playButtonPosition.x + 250/2 && mouseX > playButtonPosition.x - 250/2 && mouseY < playButtonPosition.y + 70/2 && mouseY > playButtonPosition.y - 70/2)
+    {
+        gameState = GameState.Scenes;
+    }
+    else if(!isHowToPlay && mouseX < howToButtonPosition.x + 150/2 && mouseX > howToButtonPosition.x - 150/2 && mouseY < howToButtonPosition.y + 50/2 && mouseY > howToButtonPosition.y - 50/2)
+    {
+        isHowToPlay = true;
+    }
+    if(isWinMenu && mouseX < mainmenuButtonPosition.x + 180/2 && mouseX > mainmenuButtonPosition.x - 180/2 && mouseY < mainmenuButtonPosition.y + 50/2 && mouseY > mainmenuButtonPosition.y - 50/2)
+    {
+        resetGame();
+        gameState = GameState.MainMenu;
+        isWinMenu = false;
+    }
+    if(isWinMenu && mouseX < quitButtonPosition.x + 180/2 && mouseX > quitButtonPosition.x - 180/2 && mouseY < quitButtonPosition.y + 50/2 && mouseY > quitButtonPosition.y - 50/2)
+    {
+        exit();
+    }
+}
+
+void winMenu()
+{
+    strokeWeight(2);
+    imageMode(CENTER);
+    background(mainMenuBackground);
+    fill(#00ff00);
+    rectMode(CENTER);
+    rect(mainmenuButtonPosition.x, mainmenuButtonPosition.y, 180, 50, 5);
+    fill(#ff0000);
+    rect(quitButtonPosition.x, quitButtonPosition.y, 180, 50, 5);
+    textFont(titleFont, 96);
+    fill(0);
+    text("You escaped!\nYour soul is now free!", width/2, 150);
+    fill(#ff0000);
+    text("You escaped!\nYour soul is now free!", width/2-4, 146);
+    textFont(baseFont, 24);
+    fill(0);
+    text("Main Menu", mainmenuButtonPosition.x, mainmenuButtonPosition.y);
+    text("Quit", quitButtonPosition.x, quitButtonPosition.y);
+}
+
+void resetGame()
+{
+    sceneManager.loadScene(basementScene);
+    basementScene.addMoveButton(new PVector(570, 215), new PVector(64, 64), magnifier, GameState.PipeGame);
+    storageScene.addMoveButton(new PVector(265, 300), new PVector(64, 64), magnifier, GameState.JarGame);
+    kitchenScene.addItemButton(new PVector(510, 200), new PVector(64, 64), cookKey);
+    correctJarOrder = new Jar[jarCount];
+    randomJarOrder = new Jar[jarCount];
+    for(int i = 0; i < jarCount; i++)
+    {
+        correctJarOrder[i] = new Jar(new PVector(100, 200 + (i * 10)), i, jarImage);
+    }
+    for(int i = 0; i < jarCount; i++)
+    {
+        scrambleJars(i);
+    }
+    selectedJar = null;
+    for(int i = 0; i < pipeHolders.size(); i++)
+    {
+        PipeHolder pH = pipeHolders.get(i);
+        switch(pipeLayouts[usedLayout][i])
+        {
+            case 0:
+                pH.heldPipe = new CornerPipe(pH.position, (int)(random(0, 4)), i, cornerPipeImages);
+                break;
+            case 1:
+                pH.heldPipe = new StraightPipe(pH.position, (int)(random(4, 6)), i, straightPipeImages);
+                break;
+        }
+    }
 }
