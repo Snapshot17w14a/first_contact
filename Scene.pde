@@ -60,6 +60,12 @@ class Scene
         sceneButtons.add(new TextButton(pPos, pSize, pIcon, pText));
     }
 
+    //Add mansion exit button
+    void addExitButton(PVector pPos, PVector pSize, PImage pIcon, Scene pScene)
+    {
+        sceneButtons.add(new ExitButton(pPos, pSize, pIcon, pScene));
+    }
+
     //Basic text box
     TextBox createTextBox(String pText)
     {

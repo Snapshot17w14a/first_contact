@@ -8,13 +8,19 @@ Scene basementScene;
 Scene hallwayScene;
 Scene kitchenScene;
 Scene storageScene;
+Scene winScene;
 PImage basementBackground;
 PImage hallwayBackground;
 PImage kitchenBackground;
 PImage storageBackground;
+PImage winBackground;
 PImage magnifier;
+PImage keyImage;
 Inventory inventory;
 Item glass;
+Item pipeKey;
+Item cookKey;
+Item jarKey;
 TextBox hallwayWoodBeam;
 
 //Pipe Game Variables
@@ -46,9 +52,11 @@ void setup()
     hallwayBackground = loadImage("hallwayBackground.png");
     kitchenBackground = loadImage("kitchenBackground.png");
     storageBackground = loadImage("storageBackground.png");
+    winBackground = loadImage("Factory1.png");
 
     //Item images
     magnifier = loadImage("magnifier.png");
+    keyImage = loadImage("key.png");
 
     //PipeGame images
     pipeGameBackground = loadImage("pipeBackground.png");
@@ -67,13 +75,16 @@ void setup()
 
     //Item initialization
     glass = new Item(magnifier);
+    pipeKey = new Item(keyImage);
+    cookKey = new Item(keyImage);
+    jarKey = new Item(keyImage);
 
     //Scene initialization
     basementScene = new Scene(basementBackground);
     hallwayScene = new Scene(hallwayBackground);
     kitchenScene = new Scene(kitchenBackground);
     storageScene = new Scene(storageBackground);
-
+    winScene = new Scene(winBackground);
 
     //TextBox initialization
     hallwayWoodBeam = hallwayScene.createTextBox(blockedWay);
@@ -84,7 +95,9 @@ void setup()
     hallwayScene.addMoveButton(new PVector(490, 530), new PVector(64, 64), basementScene, magnifier);
     hallwayScene.addMoveButton(new PVector(775, 320), new PVector(64, 64), kitchenScene, magnifier);
     hallwayScene.addMoveButton(new PVector(430, 290), new PVector(64, 64), storageScene, magnifier);
+    hallwayScene.addExitButton(new PVector(550, 245), new PVector(64, 64), keyImage, winScene);
     kitchenScene.addMoveButton(new PVector(100, 400), new PVector(64, 64), hallwayScene, magnifier);
+    storageScene.addMoveButton(new PVector(width/2, 550), new PVector(64, 64), hallwayScene, magnifier);
 
     //Item button initialization
 
@@ -132,22 +145,28 @@ void draw()
 //Mouse click handling
 void mousePressed() 
 {
-    if(allowMouseClick) sceneManager.mouseClick();
-    if(allowMouseClick)
+    switch(gameState)
     {
-        allowMouseClick = false;
-        for(PipeHolder pH : pipeHolders)
-        {
-            if(pH.isOverHeldPipe())
+        case Scenes:
+            if(allowMouseClick) sceneManager.mouseClick();
+            break;
+        case PipeGame:
+            if(allowMouseClick)
             {
-                pH.heldPipe.rotatePipe();
+                allowMouseClick = false;
+                for(PipeHolder pH : pipeHolders)
+                {
+                    if(pH.isOverHeldPipe())
+                    {
+                        pH.heldPipe.rotatePipe();
+                    }
+                }
             }
-        }
+            break;
     }
     allowMouseClick = false;
     println("x: " + mouseX + " | " + "y: " + mouseY);
 }
-
 void mouseReleased()
 {
     allowMouseClick = true;
@@ -183,5 +202,6 @@ void pipeGame()
         sceneManager.loadScene(basementScene);
         gameState = GameState.Scenes;
         basementScene.sceneButtons.remove(1);
+        inventory.heldItems.add(pipeKey);
     }
 }
