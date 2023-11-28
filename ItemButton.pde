@@ -17,6 +17,7 @@ class ItemButton extends Button
         {
             inventory.heldItems.add(buttonItem);
             removeButtonFrom.remove(this);
+            grabObject.play();
         }
         else
         {

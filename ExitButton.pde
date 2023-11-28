@@ -22,6 +22,7 @@ class ExitButton extends Button
         boolean exit = allowExit(false);
         if(exit) 
         {
+            mainDoorUnlock.play();
             allowExit(true);
             gameState = GameState.WinMenu;
             isWinMenu = true;

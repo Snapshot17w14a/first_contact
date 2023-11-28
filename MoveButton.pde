@@ -55,6 +55,7 @@ class MoveButton extends Button
         {
             if(inventory.isInInventory(requieredItem, true))
             {
+                playTransitionSound();
                 sceneManager.loadScene(sceneToMove);
             }
             else
@@ -68,7 +69,13 @@ class MoveButton extends Button
         }
         else
         {
+            playTransitionSound();
             sceneManager.loadScene(sceneToMove);
         }
+    }
+
+    void playTransitionSound()
+    {
+        roomTransitions[(int)(random(0,3))].play();
     }
 }

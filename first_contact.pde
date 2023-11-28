@@ -1,3 +1,5 @@
+import processing.sound.*;
+
 enum GameState{Scenes, PipeGame, JarGame, CookGame, MainMenu, WinMenu};
 
 //Framework Variables
@@ -23,8 +25,17 @@ Item pipeKey;
 Item cookKey;
 Item jarKey;
 TextBox hallwayWoodBeam;
+SoundFile mainMenuMusic;
+SoundFile gameMusic;
+SoundFile grabObject;
+SoundFile mainDoorUnlock;
+SoundFile pipeGameVictory;
+SoundFile correctChime;
+SoundFile[] roomTransitions = new SoundFile[3];
 boolean isHowToPlay = false;
 boolean isWinMenu = false;
+boolean isMainMenuLooped = false;
+boolean isgameMusicLooped = false;
 
 //PipeGame Variables
 int gridWidth = 5;
@@ -40,6 +51,7 @@ PImage[] cornerPipeImages = new PImage[4];
 int[][] pipeLayouts = {{1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0}, {0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1}};
 int[][] pipeSolutions = {{5, 1, -1, 0, 1, -1, 4, 0, 2, 4, -1, 3, 2, -1, 3}, {1, 0, 5, 5, 1, 4, 4, -1, 0, 2, 3, 2, -1, 3, 5}};
 int[] correctCountAmount = {11, 13};
+boolean isPipeGameOver = false;
 
 //JarGame Variables
 int jarCount = 5;
@@ -55,7 +67,9 @@ PImage jarArrowRight;
 PImage jarImage;
 
 //Universal Variables
+int targetMilliseconds;
 boolean allowMouseClick = true;
+boolean isDelaySet = false;
 PFont baseFont;
 PFont titleFont;
 
@@ -72,6 +86,17 @@ String blockedWay = "The pathway to the top floor seems to be blocked by a huge 
 void setup()
 {
     size(1000, 600);
+    //Load Music
+    mainMenuMusic = new SoundFile(this, "Title_screen_soundtrack.wav");
+    gameMusic = new SoundFile(this, "Soundtrack_v.3.wav");
+    grabObject = new SoundFile(this, "grabbing_object.wav");
+    mainDoorUnlock = new SoundFile(this, "door_unlock.wav");
+    pipeGameVictory = new SoundFile(this, "water_puzzle_complete.wav");
+    correctChime = new SoundFile(this, "correct_chime.wav");
+    roomTransitions[0] = new SoundFile(this, "door_1.wav");
+    roomTransitions[1] = new SoundFile(this, "door_2.wav");
+    roomTransitions[2] = new SoundFile(this, "door_3.wav");
+
     //Load fonts
     baseFont = createFont("monbaiti.ttf", 24);
     titleFont = createFont("lucindablack.ttf", 96);
@@ -186,6 +211,7 @@ void setup()
 void draw() 
 {
     background(0);
+    println(frameRate);
     if(gameState == GameState.Scenes) {drawScenes(); return;}
     if(gameState == GameState.PipeGame) {pipeGame(); return;}
     if(gameState == GameState.JarGame) {jarGame(); return;}
@@ -207,7 +233,7 @@ void mousePressed()
                 allowMouseClick = false;
                 for(PipeHolder pH : pipeHolders)
                 {
-                    if(pH.isOverHeldPipe())
+                    if(pH.isOverHeldPipe() && !isPipeGameOver)
                     {
                         pH.heldPipe.rotatePipe();
                     }
@@ -270,10 +296,16 @@ void pipeGame()
     }
     if(correctCount == correctCountAmount[usedLayout])
     {
-        sceneManager.loadScene(basementScene);
-        gameState = GameState.Scenes;
-        basementScene.sceneButtons.remove(1);
-        inventory.heldItems.add(pipeKey);
+        isPipeGameOver = true;
+        if(!isDelaySet) {setupDelay((int)(pipeGameVictory.duration())); pipeGameVictory.play(); correctChime.play();}
+        if(isDelayOver())
+        {
+            sceneManager.loadScene(basementScene);
+            gameState = GameState.Scenes;
+            basementScene.sceneButtons.remove(1);
+            inventory.heldItems.add(pipeKey);
+            grabObject.play();
+        }
     }
 }
 
@@ -307,6 +339,7 @@ void jarGame()
         gameState = GameState.Scenes;
         storageScene.sceneButtons.remove(1);
         inventory.heldItems.add(jarKey);
+        isDelaySet = false;
     }
 }
 
@@ -323,6 +356,7 @@ void scrambleJars(int index)
 //Main Menu logic
 void mainMenu()
 {
+    if(!isMainMenuLooped) {isMainMenuLooped = true; mainMenuMusic.loop();}
     imageMode(CENTER);
     background(mainMenuBackground);
     strokeWeight(2);
@@ -375,6 +409,8 @@ void checkMenuClick()
     if(!isHowToPlay && mouseX < playButtonPosition.x + 250/2 && mouseX > playButtonPosition.x - 250/2 && mouseY < playButtonPosition.y + 70/2 && mouseY > playButtonPosition.y - 70/2)
     {
         gameState = GameState.Scenes;
+        mainMenuMusic.stop();
+        gameMusic.loop();
     }
     else if(!isHowToPlay && mouseX < howToButtonPosition.x + 150/2 && mouseX > howToButtonPosition.x - 150/2 && mouseY < howToButtonPosition.y + 50/2 && mouseY > howToButtonPosition.y - 50/2)
     {
@@ -443,4 +479,16 @@ void resetGame()
                 break;
         }
     }
+    isPipeGameOver = false;
+}
+
+boolean isDelayOver()
+{
+    return millis() >= targetMilliseconds;
+}
+
+void setupDelay(int secondsToDelay)
+{
+    targetMilliseconds = millis() + secondsToDelay*1000;
+    isDelaySet = true;
 }
