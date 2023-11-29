@@ -16,6 +16,7 @@ class JarButton
         }
         else
         {
+            jarSlides[(int)(random(0, 2))].play();
             Jar jar1 = randomJarOrder[toMoveIndex];
             Jar jar2 = randomJarOrder[toMoveIndex + 1];
             randomJarOrder[toMoveIndex] = jar2;
@@ -33,6 +34,7 @@ class JarButton
         }
         else
         {
+            jarSlides[(int)(random(0, 2))].play();
             Jar jar1 = randomJarOrder[toMoveIndex];
             Jar jar2 = randomJarOrder[toMoveIndex - 1];
             randomJarOrder[toMoveIndex] = jar2;

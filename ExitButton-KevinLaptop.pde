@@ -27,11 +27,6 @@ class ExitButton extends Button
             gameState = GameState.WinMenu;
             isWinMenu = true;
         }
-        else
-        {
-            keysMissing.toggleRender();
-            lockedDoor.play();
-        } 
     }
 
     boolean allowExit(boolean removeKeys)

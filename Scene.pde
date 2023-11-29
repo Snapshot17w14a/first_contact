@@ -50,9 +50,9 @@ class Scene
     }
 
     //Basic item button
-    void addItemButton(PVector pPos, PVector pSize, Item pItem)
+    void addItemButton(PVector pPos, PVector pSize, Item pItem, boolean pIsKey)
     {
-        sceneButtons.add(new ItemButton(pPos, pSize, pItem, sceneButtons));
+        sceneButtons.add(new ItemButton(pPos, pSize, pItem, sceneButtons, pIsKey));
     }
 
     //Basic text button
