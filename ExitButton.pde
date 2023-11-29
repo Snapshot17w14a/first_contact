@@ -1,14 +1,12 @@
 class ExitButton extends Button
 {
     PImage buttonIcon;
-    Scene exitScene;
 
-    ExitButton(PVector pPos, PVector pSize, PImage pIcon, Scene pScene)
+    ExitButton(PVector pPos, PVector pSize, PImage pIcon)
     {
         buttonPosition = pPos;
         buttonSize = pSize;
         buttonIcon = pIcon;
-        exitScene = pScene;
     }
 
     void drawButton()

@@ -5,6 +5,7 @@ class MoveButton extends Button
     Scene sceneToMove;
     PImage buttonIcon;
     Item requieredItem;
+    SoundFile transitionSound;
 
     MoveButton(PVector pPos, PVector pSize, Scene pScene)
     {
@@ -28,6 +29,15 @@ class MoveButton extends Button
         sceneToMove = pScene;
         buttonIcon = pIcon;
         requieredItem = pItem;
+    }
+
+    MoveButton(PVector pPos, PVector pSize, Scene pScene, PImage pIcon, SoundFile pTransition)
+    {
+        buttonPosition = pPos;
+        buttonSize = pSize;
+        sceneToMove = pScene;
+        buttonIcon = pIcon;
+        transitionSound = pTransition;
     }
 
     MoveButton(PVector pPos, PVector pSize, PImage pIcon, GameState pGameState)
@@ -69,8 +79,16 @@ class MoveButton extends Button
         }
         else
         {
-            playTransitionSound();
-            sceneManager.loadScene(sceneToMove);
+            if(transitionSound != null)
+            {
+                transitionSound.play();
+                sceneManager.loadScene(sceneToMove);
+            }
+            else
+            {
+                playTransitionSound();
+                sceneManager.loadScene(sceneToMove);
+            }
         }
     }
 

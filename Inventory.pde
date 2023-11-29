@@ -18,12 +18,12 @@ class Inventory
     {
         allowItemPickup = (heldItems.size() < slotCount) ? true : false;
         strokeWeight(0);
-        fill(255, 255, 255, 255);
+        fill(128, 128, 128, 225);
         for(int i = 0; i < slotCount; i++)
         {
             int yPos = (i * boxSize) + yOffset * (i + 1);
             rectMode(CORNER);
-            rect(xPos, yPos, boxSize, boxSize);
+            rect(xPos, yPos, boxSize, boxSize, 10);
         }
         int loopCount = min(heldItems.size(), slotCount);
         for(int i = 0; i < loopCount; i++)

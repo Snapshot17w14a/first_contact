@@ -32,8 +32,8 @@ class Cake extends Button
         }
         else
         {
-            inventory.heldItems.add(cookKey);
-            keysPickup.play();
+            if(inventory.allowItemPickup) inventory.heldItems.add(fullBowl);
+            else kitchenScene.addItemButton(new PVector(480, 265), new PVector(64, 64), fullBowl, false);
             removeButtonFrom.remove(this);
         }
     }
@@ -41,7 +41,7 @@ class Cake extends Button
     void drawButton()
     {
         fill(255, 255, 255, 255);
-        PImage imageToDraw = (itemsAdded == 5) ? keyImage : cakeIcon;
+        PImage imageToDraw = (itemsAdded == 5) ? fullBowlImage : cakeIcon;
         image(imageToDraw, buttonPosition.x - buttonSize.x/2, buttonPosition.y - buttonSize.y/2, 64, 64);
     }
 }
