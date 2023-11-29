@@ -36,6 +36,7 @@ class StraightPipe extends Pipe
 
     void rotatePipe()
     {
+        pipeSound.play();
         switch(pipeRotationNum)
         {
             case 4:

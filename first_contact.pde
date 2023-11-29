@@ -31,6 +31,7 @@ SoundFile grabObject;
 SoundFile mainDoorUnlock;
 SoundFile pipeGameVictory;
 SoundFile correctChime;
+SoundFile pipeSound;
 SoundFile[] roomTransitions = new SoundFile[3];
 boolean isHowToPlay = false;
 boolean isWinMenu = false;
@@ -93,6 +94,7 @@ void setup()
     mainDoorUnlock = new SoundFile(this, "door_unlock.wav");
     pipeGameVictory = new SoundFile(this, "water_puzzle_complete.wav");
     correctChime = new SoundFile(this, "correct_chime.wav");
+    pipeSound = new SoundFile(this, "pipeRotating.wav");
     roomTransitions[0] = new SoundFile(this, "door_1.wav");
     roomTransitions[1] = new SoundFile(this, "door_2.wav");
     roomTransitions[2] = new SoundFile(this, "door_3.wav");

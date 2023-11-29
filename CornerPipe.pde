@@ -48,6 +48,7 @@ class CornerPipe extends Pipe
 
     void rotatePipe()
     {
+        pipeSound.play();
         if(pipeRotationNum < 3) pipeRotationNum++;
         else pipeRotationNum = 0;
         switch(pipeRotationNum)
