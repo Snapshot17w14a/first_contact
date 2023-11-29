@@ -41,10 +41,7 @@ class Inventory
         {
             if(heldItems.get(i) == item)
             {
-                if(removeFound)
-                {
-                    heldItems.remove(i);
-                }
+                if(removeFound) heldItems.remove(i);
                 foundItem = true;
                 break;
             }

@@ -2,15 +2,13 @@ class ItemButton extends Button
 {
     Item buttonItem;
     ArrayList removeButtonFrom;
-    boolean isKey;
 
-    ItemButton(PVector pPos, PVector pSize, Item pItem, ArrayList pArray, boolean pIsKey)
+    ItemButton(PVector pPos, PVector pSize, Item pItem, ArrayList pArray)
     {
         buttonPosition = pPos;
         buttonSize = pSize;
         buttonItem = pItem;
         removeButtonFrom = pArray;
-        isKey = pIsKey;
     }
 
     void buttonAction()
@@ -19,12 +17,11 @@ class ItemButton extends Button
         {
             inventory.heldItems.add(buttonItem);
             removeButtonFrom.remove(this);
-            SoundFile sf = (isKey) ? keysPickup : grabObject;
-            sf.play();
+            grabObject.play();
         }
         else
         {
-            fullInventoryNotification.toggleRender();
+            println("inv full");
         }
     }
 
