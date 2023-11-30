@@ -16,7 +16,8 @@ Scene jarHint;
 Scene pipeHint;
 Scene kitchenHint;
 Scene introStory;
-PImage basementBackground;
+PImage basementScatteredBackground;
+PImage basementCompletedBackground;
 PImage hallwayBackground;
 PImage kitchenBackground;
 PImage storageBackground;
@@ -25,6 +26,7 @@ PImage mainMenuBackground;
 PImage jarHintBackground;
 PImage pipeHintBackground;
 PImage kitchenHintBackground;
+PImage gameOverBackground;
 PImage magnifier;
 PImage keyImage;
 PImage bowl;
@@ -74,7 +76,7 @@ int gameEndMilliseconds;
 int gridWidth = 5;
 int gridHeight = 3;
 int usedLayout;
-static int gridBoxSize = 133;
+static int gridBoxSize = 145;
 ArrayList<PipeHolder> pipeHolders = new ArrayList<PipeHolder>();
 PImage pipeGameBackground;
 PImage straightPipeUpDown;
@@ -98,6 +100,8 @@ JarButton moveLeft;
 JarButton moveRight;
 PImage jarArrowLeft;
 PImage jarArrowRight;
+PImage jarArrowUp;
+PImage jarArrowDown;
 PImage[] jarImages = new PImage[5];
 
 //Universal Variables
@@ -154,7 +158,8 @@ void setup()
     introText = loadStrings("introtext.txt");
     
     //Background images
-    basementBackground = loadImage("basementBackground.png");
+    basementScatteredBackground = loadImage("BasementScattered.png");
+    basementCompletedBackground = loadImage("BasementCompleted.png");
     hallwayBackground = loadImage("hallwayBackground.png");
     kitchenBackground = loadImage("kitchenBackground.png");
     storageBackground = loadImage("storageBackground.png");
@@ -162,6 +167,7 @@ void setup()
     jarHintBackground = loadImage("jarHintBackground.png");
     pipeHintBackground = loadImage("pipeHintBackground.png");
     kitchenHintBackground = loadImage("kitchenHintBackground.png");
+    gameOverBackground = loadImage("gameOverBackground.png");
 
     //Item images
     kitchenHintPaper = loadImage("kitchenHint.png");
@@ -171,7 +177,7 @@ void setup()
     magnifier = loadImage("magnifier.png");
     keyImage = loadImage("key.png");
     bowl = loadImage("bowl.png");
-    fullBowlImage = loadImage("fullBowl.png");
+    fullBowlImage = loadImage("fullBowlItem.png");
     cookGameItems[0] = loadImage("water.png");
     cookGameItems[1] = loadImage("honey.png");
     cookGameItems[2] = loadImage("flour.png");
@@ -181,12 +187,23 @@ void setup()
 
     //PipeGame images
     pipeGameBackground = loadImage("pipeBackground.png");
-    straightPipeImages[0] = loadImage("Pipe_Straight_UpDown.png");
-    straightPipeImages[1] = loadImage("Pipe_Straight_LeftRight.png");
-    cornerPipeImages[0] = loadImage("Pipe_Corner_SouthEast.png");
-    cornerPipeImages[1] = loadImage("Pipe_Corner_SouthWest.png");
-    cornerPipeImages[2] = loadImage("Pipe_Corner_NorthEast.png");
-    cornerPipeImages[3] = loadImage("Pipe_Corner_NorthWest.png");
+    straightPipeImages[0] = loadImage("pipeUpDown.png");
+    straightPipeImages[1] = loadImage("pipeLeftRight.png");
+    cornerPipeImages[0] = loadImage("pipeSouthEast.png");
+    cornerPipeImages[1] = loadImage("pipeSouthWest.png");
+    cornerPipeImages[2] = loadImage("pipeNorthEast.png");
+    cornerPipeImages[3] = loadImage("pipeNorthWest.png");
+
+    //JarGame images
+    jarArrowLeft = loadImage("left_arrow.png");
+    jarArrowRight = loadImage("right_arrow.png");
+    jarArrowUp = loadImage("upArrow.png");
+    jarArrowDown = loadImage("downArrow.png");
+    jarImages[0] = loadImage("jar5.png");
+    jarImages[1] = loadImage("jar4.png");
+    jarImages[2] = loadImage("jar3.png");
+    jarImages[3] = loadImage("jar2.png");
+    jarImages[4] = loadImage("jar1.png");
 
     //SceneManager initialization
     sceneManager = new SceneManager();
@@ -208,11 +225,11 @@ void setup()
     cookItems[4] = new Item(cookGameItems[4]);
 
     //Scene initialization
-    basementScene = new Scene(basementBackground);
+    basementScene = new Scene(basementScatteredBackground);
     hallwayScene = new Scene(hallwayBackground);
     kitchenScene = new Scene(kitchenBackground);
     storageScene = new Scene(storageBackground);
-    gameOverScene = new Scene(mainMenuBackground);
+    gameOverScene = new Scene(gameOverBackground);
     introStory = new Scene(mainMenuBackground);
     kitchenHint = new Scene(kitchenHintBackground, true, kitchenScene);
     jarHint = new Scene(jarHintBackground, true, GameState.JarGame);
@@ -227,26 +244,26 @@ void setup()
     cookKeyFound = kitchenScene.createTextBox(cookKeyText);
 
     //Move button initialization
-    basementScene.addMoveButton(new PVector(270, 175), new PVector(64, 64), hallwayScene, magnifier);
+    basementScene.addMoveButton(new PVector(358, 128), new PVector(48, 48), hallwayScene, jarArrowUp);
     basementScene.addMoveButton(new PVector(455, 225), new PVector(64, 64), pipeHint, pipeHintPaper, notePickup);
-    hallwayScene.addMoveButton(new PVector(490, 530), new PVector(64, 64), basementScene, magnifier);
-    hallwayScene.addMoveButton(new PVector(775, 320), new PVector(64, 64), kitchenScene, magnifier);
-    hallwayScene.addMoveButton(new PVector(430, 290), new PVector(64, 64), storageScene, magnifier);
-    hallwayScene.addExitButton(new PVector(612, 200), new PVector(64, 64), keyImage);
-    kitchenScene.addMoveButton(new PVector(100, 400), new PVector(64, 64), hallwayScene, magnifier);
+    hallwayScene.addMoveButton(new PVector(490, 530), new PVector(48, 48), basementScene, jarArrowDown);
+    hallwayScene.addMoveButton(new PVector(769, 257), new PVector(48, 48), kitchenScene, jarArrowRight);
+    hallwayScene.addMoveButton(new PVector(418, 252), new PVector(48, 48), storageScene, jarArrowLeft);
+    hallwayScene.addExitButton(new PVector(527, 202), new PVector(64, 64), keyImage);
+    kitchenScene.addMoveButton(new PVector(155, 281), new PVector(48, 48), hallwayScene, jarArrowLeft);
     kitchenScene.addMoveButton(new PVector(270, 373), new PVector(64, 64), kitchenHint, kitchenHintPaper, notePickup);
-    storageScene.addMoveButton(new PVector(width/2, 550), new PVector(64, 64), hallwayScene, magnifier);
+    storageScene.addMoveButton(new PVector(width/2, 550), new PVector(48, 48), hallwayScene, jarArrowDown);
     storageScene.addMoveButton(new PVector(265, 300), new PVector(64, 64), jarHint, jarHintPaper, notePickup);
-    cake = new Cake(new PVector(330, 280), new PVector(64, 64), bowl, kitchenScene.sceneButtons);
+    cake = new Cake(new PVector(379, 250), new PVector(64, 64), bowl, kitchenScene.sceneButtons);
     kitchenScene.sceneButtons.add(cake);
 
     //Cook game initialization
     cake.itemsNeeded = cookItems;
-    kitchenScene.sceneButtons.add(new Oven(new PVector(460, 332), new PVector(32, 32), ovenHeat));
+    kitchenScene.sceneButtons.add(new Oven(new PVector(576, 317), new PVector(32, 32), ovenHeat));
     hideIngredients();
 
     //Text button initialization
-    hallwayScene.addTextButton(new PVector(270, 250), new PVector(64, 64), magnifier, hallwayWoodBeam);
+    hallwayScene.addTextButton(new PVector(168, 192), new PVector(64, 64), magnifier, hallwayWoodBeam);
 
     //Load first scene
     sceneManager.currentScene = introStory;
@@ -260,7 +277,7 @@ void setup()
         int yPos = 170 + (gridBoxSize * rows);
         for(int column = 0; column < gridWidth; column++)
         {
-            int xPos = 217 + (gridBoxSize * column);
+            int xPos = 220 + (gridBoxSize * column);
             pipeHolders.add(new PipeHolder(new PVector(xPos, yPos)));
         }
     }
@@ -280,13 +297,6 @@ void setup()
     }
 
     //JarGame Initialization
-    jarArrowLeft = loadImage("left_arrow.png");
-    jarArrowRight = loadImage("right_arrow.png");
-    jarImages[0] = loadImage("jar5.png");
-    jarImages[1] = loadImage("jar4.png");
-    jarImages[2] = loadImage("jar3.png");
-    jarImages[3] = loadImage("jar2.png");
-    jarImages[4] = loadImage("jar1.png");
     correctJarOrder = new Jar[jarCount];
     randomJarOrder = new Jar[jarCount];
     for(int i = 0; i < jarCount; i++)
@@ -311,7 +321,7 @@ void draw()
         fill(#2FAD87);
         textAlign(RIGHT, CENTER);
         textFont(baseFont, 24);
-        text("Seconds left until daytime: " + (int)((gameEndMilliseconds - millis()) / 1000), 980, 20);
+        if(!(millis() >= gameEndMilliseconds)) text("Seconds left until daytime: " + (int)((gameEndMilliseconds - millis()) / 1000), 980, 20);
         return;
     }
     if(gameState == GameState.PipeGame) {pipeGame(); return;}
@@ -379,7 +389,6 @@ void drawScenes()
     if(millis() >= gameEndMilliseconds) 
     {
         sceneManager.loadScene(gameOverScene);
-        gameMusic.stop();
         return;
     }
     if(sceneManager.currentScene == introStory) 
@@ -420,6 +429,7 @@ void pipeGame()
             gameState = GameState.Scenes;
             basementScene.sceneButtons.remove(1);
             isDelaySet = false;
+            basementScene.background = basementCompletedBackground;
             if(inventory.allowItemPickup)
             {
                 inventory.heldItems.add(pipeKey);
@@ -587,9 +597,9 @@ void winMenu()
 void resetGame()
 {
     sceneManager.loadScene(basementScene);
-    basementScene.addMoveButton(new PVector(570, 215), new PVector(64, 64), magnifier, GameState.PipeGame);
-    storageScene.addMoveButton(new PVector(265, 300), new PVector(64, 64), magnifier, GameState.JarGame);
-    kitchenScene.addItemButton(new PVector(510, 200), new PVector(64, 64), cookKey, true);
+    basementScene.background = basementScatteredBackground;
+    basementScene.addMoveButton(new PVector(455, 225), new PVector(64, 64), pipeHint, pipeHintPaper, notePickup);
+    storageScene.addMoveButton(new PVector(265, 300), new PVector(64, 64), jarHint, jarHintPaper, notePickup);
     correctJarOrder = new Jar[jarCount];
     randomJarOrder = new Jar[jarCount];
     for(int i = 0; i < jarCount; i++)
@@ -616,7 +626,7 @@ void resetGame()
     }
     isPipeGameOver = false;
     isJarGameOver = false;
-    cake = new Cake(new PVector(480, 265), new PVector(64, 64), bowl, kitchenScene.sceneButtons);
+    cake = new Cake(new PVector(330, 280), new PVector(64, 64), bowl, kitchenScene.sceneButtons);
     kitchenScene.sceneButtons.add(cake);
     cake.itemsNeeded = cookItems;
     hideIngredients();
@@ -647,7 +657,7 @@ void hideIngredients()
     }
     randomIndexes.shuffle();
     basementScene.addItemButton(new PVector(875, 345), new PVector(64, 64),cookItems[randomIndexes.get(0)], false);
-    kitchenScene.addItemButton(new PVector(310, 150), new PVector(64, 64),cookItems[randomIndexes.get(1)], false);
+    kitchenScene.addItemButton(new PVector(373, 67), new PVector(64, 64),cookItems[randomIndexes.get(1)], false);
     storageScene.addItemButton(new PVector(685, 315), new PVector(64, 64),cookItems[randomIndexes.get(2)], false);
     storageScene.addItemButton(new PVector(275, 65), new PVector(64, 64),cookItems[randomIndexes.get(3)], false);
     hallwayScene.addItemButton(new PVector(50, 440), new PVector(64, 64),cookItems[randomIndexes.get(4)], false);

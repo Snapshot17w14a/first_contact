@@ -32,6 +32,8 @@ class ItemButton extends Button
     {
         strokeWeight(12);
         fill(255, 255, 255, 255);
+        tint(16, 16, 16, 255);
         image(buttonItem.itemImage, buttonPosition.x - buttonSize.x/2, buttonPosition.y - buttonSize.y/2, buttonSize.x, buttonSize.y);
+        noTint();
     }
 }
