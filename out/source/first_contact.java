@@ -598,7 +598,7 @@ public void mainMenu()
         textAlign(LEFT, TOP);
         fill(0);
         textFont(baseFont, 24);
-        text("do puzzles, get keys and escape", width/2, height/2, 890, 390);
+        text("Try to walk trough the areas by clicking on the arrows indicating the locations.\n\nSearch for the keys within the puzzles that are hidden throughout the mansion.\n\nOnce you have collected all 3 keys you can exit through the front door and free your soul from the ethernal suffering.", width/2, height/2, 890, 390);
     }
 }
 
@@ -769,7 +769,8 @@ class Cake extends Button
     {
         fill(255, 255, 255, 255);
         PImage imageToDraw = (itemsAdded == 5) ? fullBowlImage : cakeIcon;
-        tint(16, 16, 16, 255);
+        if(mouseX < buttonPosition.x + buttonSize.x/2 && mouseX > buttonPosition.x - buttonSize.x/2 && mouseY < buttonPosition.y + buttonSize.y/2 && mouseY > buttonPosition.y - buttonSize.y/2) noTint();
+        else tint(16, 16, 16, 255);
         image(imageToDraw, buttonPosition.x - buttonSize.x/2, buttonPosition.y - buttonSize.y/2, 64, 64);
         noTint();
     }
@@ -983,7 +984,8 @@ class ItemButton extends Button
     {
         strokeWeight(12);
         fill(255, 255, 255, 255);
-        tint(16, 16, 16, 255);
+        if(mouseX < buttonPosition.x + buttonSize.x/2 && mouseX > buttonPosition.x - buttonSize.x/2 && mouseY < buttonPosition.y + buttonSize.y/2 && mouseY > buttonPosition.y - buttonSize.y/2) noTint();
+        else tint(16, 16, 16, 255);
         image(buttonItem.itemImage, buttonPosition.x - buttonSize.x/2, buttonPosition.y - buttonSize.y/2, buttonSize.x, buttonSize.y);
         noTint();
     }

@@ -32,7 +32,8 @@ class ItemButton extends Button
     {
         strokeWeight(12);
         fill(255, 255, 255, 255);
-        tint(16, 16, 16, 255);
+        if(mouseX < buttonPosition.x + buttonSize.x/2 && mouseX > buttonPosition.x - buttonSize.x/2 && mouseY < buttonPosition.y + buttonSize.y/2 && mouseY > buttonPosition.y - buttonSize.y/2) noTint();
+        else tint(16, 16, 16, 255);
         image(buttonItem.itemImage, buttonPosition.x - buttonSize.x/2, buttonPosition.y - buttonSize.y/2, buttonSize.x, buttonSize.y);
         noTint();
     }

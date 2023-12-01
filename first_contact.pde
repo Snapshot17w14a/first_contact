@@ -579,7 +579,7 @@ void mainMenu()
         textAlign(LEFT, TOP);
         fill(0);
         textFont(baseFont, 24);
-        text("do puzzles, get keys and escape", width/2, height/2, 890, 390);
+        text("Try to walk trough the areas by clicking on the arrows indicating the locations.\n\nSearch for the keys within the puzzles that are hidden throughout the mansion.\n\nOnce you have collected all 3 keys you can exit through the front door and free your soul from the ethernal suffering.", width/2, height/2, 890, 390);
     }
 }
 

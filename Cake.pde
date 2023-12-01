@@ -42,7 +42,8 @@ class Cake extends Button
     {
         fill(255, 255, 255, 255);
         PImage imageToDraw = (itemsAdded == 5) ? fullBowlImage : cakeIcon;
-        tint(16, 16, 16, 255);
+        if(mouseX < buttonPosition.x + buttonSize.x/2 && mouseX > buttonPosition.x - buttonSize.x/2 && mouseY < buttonPosition.y + buttonSize.y/2 && mouseY > buttonPosition.y - buttonSize.y/2) noTint();
+        else tint(16, 16, 16, 255);
         image(imageToDraw, buttonPosition.x - buttonSize.x/2, buttonPosition.y - buttonSize.y/2, 64, 64);
         noTint();
     }
