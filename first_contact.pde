@@ -508,6 +508,7 @@ void checkMenuClick()
             gameState = GameState.Scenes;
             startGameplayTimer();
             mainMenuMusic.stop();
+            isMainMenuLooped = false;
             gameMusic.loop();
             break;
         case MainMenu:

@@ -325,14 +325,8 @@ public void setup()
     //JarGame Initialization
     correctJarOrder = new Jar[jarCount];
     randomJarOrder = new Jar[jarCount];
-    for(int i = 0; i < jarCount; i++)
-    {
-        correctJarOrder[i] = new Jar(new PVector(200, 200), i, jarImages[i]);
-    }
-    for(int i = 0; i < jarCount; i++)
-    {
-        scrambleJars(i);
-    }
+    for(int i = 0; i < jarCount; i++) correctJarOrder[i] = new Jar(new PVector(200, 200), i, jarImages[i]);
+    for(int i = 0; i < jarCount; i++) scrambleJars(i);
     moveRight = new JarButton(jarArrowRight, new PVector(700, 500));
     moveLeft = new JarButton(jarArrowLeft, new PVector(300, 500));
     selectedJar = null;
@@ -427,7 +421,6 @@ public void mousePressed()
         }
     }
     allowMouseClick = false;
-    println("x: " + mouseX + " | " + "y: " + mouseY);
 }
 public void mouseReleased()
 {
@@ -453,17 +446,11 @@ public void pipeGame()
     imageMode(CENTER);
     image(jarArrowDown, 950, 550, 40, 40);
     imageMode(CORNER);
-    for(PipeHolder pHolder : pipeHolders)
-    {
-        pHolder.drawHolder();
-    }
+    for(PipeHolder pHolder : pipeHolders) pHolder.drawHolder();
     for(int i = 0; i < pipeHolders.size(); i++)
     {
         PipeHolder pHolder = pipeHolders.get(i);
-        if(pipeSolutions[usedLayout][i] != -1 && pipeSolutions[usedLayout][i] == pHolder.heldPipe.pipeRotationNum)
-        {
-            correctCount++;
-        }
+        if(pipeSolutions[usedLayout][i] != -1 && pipeSolutions[usedLayout][i] == pHolder.heldPipe.pipeRotationNum) correctCount++;
     }
     if(correctCount == correctCountAmount[usedLayout])
     {
@@ -493,26 +480,16 @@ public void jarGame()
     imageMode(CENTER);
     image(jarArrowDown, 950, 550, 40, 40);
     imageMode(CORNER);
-    for(Jar jar : correctJarOrder)
-    {
-        jar.drawJar();
-    }
+    for(Jar jar : correctJarOrder) jar.drawJar();
     if(selectedJar != null)
     {
         isJarAvailable = true;
         moveRight.drawArrow();
         moveLeft.drawArrow();
     }
-    else
-    {
-        isJarAvailable = false;
-    }
+    else isJarAvailable = false;
     int correctCount = 0;
-    for(Jar jar : correctJarOrder)
-    {
-        if(jar.isInCorrectSpot == true) correctCount++;
-    }
-    textAlign(CENTER, CENTER);
+    for(Jar jar : correctJarOrder) if(jar.isInCorrectSpot == true) correctCount++;
     if(correctCount == 5)
     {
         isJarGameOver = true;
@@ -550,6 +527,7 @@ public void checkMenuClick()
             gameState = GameState.Scenes;
             startGameplayTimer();
             mainMenuMusic.stop();
+            isMainMenuLooped = false;
             gameMusic.loop();
             break;
         case MainMenu:
@@ -677,14 +655,8 @@ public void resetGame()
     storageScene.addMoveButton(new PVector(285, 354), new PVector(64, 64), jarHint, jarHintPaper, notePickup);
     correctJarOrder = new Jar[jarCount];
     randomJarOrder = new Jar[jarCount];
-    for(int i = 0; i < jarCount; i++)
-    {
-        correctJarOrder[i] = new Jar(new PVector(200, 200), i, jarImages[i]);
-    }
-    for(int i = 0; i < jarCount; i++)
-    {
-        scrambleJars(i);
-    }
+    for(int i = 0; i < jarCount; i++) correctJarOrder[i] = new Jar(new PVector(200, 200), i, jarImages[i]);
+    for(int i = 0; i < jarCount; i++) scrambleJars(i);
     selectedJar = null;
     for(int i = 0; i < pipeHolders.size(); i++)
     {
