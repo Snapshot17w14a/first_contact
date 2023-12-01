@@ -11,6 +11,7 @@ class PipeHolder
     void drawHolder()
     {
         rectMode(CENTER);
+        strokeWeight(0);
         fill(255, 255, 255, 0);
         rect(position.x, position.y, gridBoxSize, gridBoxSize);
         heldPipe.drawPipe();

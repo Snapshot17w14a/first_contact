@@ -1,6 +1,6 @@
 import processing.sound.*;
 
-enum GameState{Scenes, PipeGame, JarGame, CookGame, MainMenu, WinMenu};
+enum GameState{Scenes, PipeGame, JarGame, StoryScreen, MainMenu, WinMenu, DeathMenu};
 
 //Framework Variables
 GameState gameState = GameState.MainMenu;
@@ -11,11 +11,9 @@ Scene basementScene;
 Scene hallwayScene;
 Scene kitchenScene;
 Scene storageScene;
-Scene gameOverScene;
 Scene jarHint;
 Scene pipeHint;
 Scene kitchenHint;
-Scene introStory;
 PImage basementScatteredBackground;
 PImage basementCompletedBackground;
 PImage hallwayBackground;
@@ -26,7 +24,8 @@ PImage mainMenuBackground;
 PImage jarHintBackground;
 PImage pipeHintBackground;
 PImage kitchenHintBackground;
-PImage gameOverBackground;
+PImage deathBackground;
+PImage jarGameBackground;
 PImage magnifier;
 PImage keyImage;
 PImage bowl;
@@ -35,6 +34,8 @@ PImage jarHintPaper;
 PImage pipeHintPaper;
 PImage kitchenHintPaper;
 PImage ovenHeat;
+PImage inventoryImage;
+PImage lockedDoorImage;
 PImage[] cookGameItems = new PImage[5];
 Inventory inventory;
 Item glass;
@@ -47,8 +48,9 @@ TextBox hallwayWoodBeam;
 TextBox fullInventoryNotification;
 TextBox keysMissing;
 TextBox missingIngredients;
-TextBox introTextBox;
+TextBox missingBowl;
 TextBox cleanerTextbox;
+TextBox pipeTextBox;
 TextBox cookKeyFound;
 SoundFile mainMenuMusic;
 SoundFile gameMusic;
@@ -69,6 +71,8 @@ boolean isHowToPlay = false;
 boolean isWinMenu = false;
 boolean isMainMenuLooped = false;
 boolean isgameMusicLooped = false;
+boolean isStoryScreen = false;
+boolean isGameplayTimerSet = false;
 int gameplaySeconds = 300;
 int gameEndMilliseconds;
 
@@ -123,8 +127,10 @@ String blockedWay = "The pathway to the top floor seems to be blocked by a huge 
 String fullInventory = "The burden of carrying this would be too much for your fragile soul.";
 String keysText = "You have not found all the keys requiered to free your soul, go search for them before the clock hits 8am!";
 String missingIngredientsText = "You do not have any ingredients to put in the bowl at this moment!";
+String missingBowlText = "You do not have anything on you that needs cooking.";
 String cookKeyText = "While preparing the cake for you long lost shef friend you notice a key hanging from the heatin element of the oven.";
-String cleanerKeyPosition = "Cleaner's soul:\nThank you for finishing my neverending torture of stearing at these unorganized jars, the key for one of the locks is in the basket next to the winerack.";
+String cleanerKeyPosition = "Cleaner's soul:\nThank you for organizing those jars my friend, it has been bothering my soul for a century. One of the keys for the main door is in the basket next to the winerack.";
+String pipeText = "After connecting the pipes you notice that the waterflow pushed a key out of the drain pipe.";
 String[] introText;
 
 void setup()
@@ -167,17 +173,20 @@ void setup()
     jarHintBackground = loadImage("jarHintBackground.png");
     pipeHintBackground = loadImage("pipeHintBackground.png");
     kitchenHintBackground = loadImage("kitchenHintBackground.png");
-    gameOverBackground = loadImage("gameOverBackground.png");
+    deathBackground = loadImage("deathBackground.png");
+    jarGameBackground = loadImage("jarGameBackground.png");
 
     //Item images
     kitchenHintPaper = loadImage("kitchenHint.png");
     jarHintPaper = loadImage("jarHint.png");
     pipeHintPaper = loadImage("pipeHint.png");
     ovenHeat = loadImage("oven.png");
-    magnifier = loadImage("magnifier.png");
+    magnifier = loadImage("magnifyingGlass.png");
     keyImage = loadImage("key.png");
     bowl = loadImage("bowl.png");
     fullBowlImage = loadImage("fullBowlItem.png");
+    inventoryImage = loadImage("inventory.png");
+    lockedDoorImage = loadImage("lockedDoor.png");
     cookGameItems[0] = loadImage("water.png");
     cookGameItems[1] = loadImage("honey.png");
     cookGameItems[2] = loadImage("flour.png");
@@ -229,17 +238,16 @@ void setup()
     hallwayScene = new Scene(hallwayBackground);
     kitchenScene = new Scene(kitchenBackground);
     storageScene = new Scene(storageBackground);
-    gameOverScene = new Scene(gameOverBackground);
-    introStory = new Scene(mainMenuBackground);
     kitchenHint = new Scene(kitchenHintBackground, true, kitchenScene);
     jarHint = new Scene(jarHintBackground, true, GameState.JarGame);
     pipeHint = new Scene(pipeHintBackground, true, GameState.PipeGame);
 
     //TextBox initialization
+    pipeTextBox = basementScene.createTextBox(pipeText);
     hallwayWoodBeam = hallwayScene.createTextBox(blockedWay);
     keysMissing = hallwayScene.createTextBox(keysText);
     missingIngredients = kitchenScene.createTextBox(missingIngredientsText);
-    introTextBox = introStory.createTextBox(introText[0], true, basementScene);
+    missingBowl = kitchenScene.createTextBox(missingBowlText);
     cleanerTextbox = storageScene.createTextBox(cleanerKeyPosition);
     cookKeyFound = kitchenScene.createTextBox(cookKeyText);
 
@@ -249,27 +257,26 @@ void setup()
     hallwayScene.addMoveButton(new PVector(490, 530), new PVector(48, 48), basementScene, jarArrowDown);
     hallwayScene.addMoveButton(new PVector(769, 257), new PVector(48, 48), kitchenScene, jarArrowRight);
     hallwayScene.addMoveButton(new PVector(418, 252), new PVector(48, 48), storageScene, jarArrowLeft);
-    hallwayScene.addExitButton(new PVector(527, 202), new PVector(64, 64), keyImage);
+    hallwayScene.addExitButton(new PVector(524, 251), new PVector(64, 64), lockedDoorImage);
     kitchenScene.addMoveButton(new PVector(155, 281), new PVector(48, 48), hallwayScene, jarArrowLeft);
     kitchenScene.addMoveButton(new PVector(270, 373), new PVector(64, 64), kitchenHint, kitchenHintPaper, notePickup);
     storageScene.addMoveButton(new PVector(width/2, 550), new PVector(48, 48), hallwayScene, jarArrowDown);
-    storageScene.addMoveButton(new PVector(265, 300), new PVector(64, 64), jarHint, jarHintPaper, notePickup);
-    cake = new Cake(new PVector(379, 250), new PVector(64, 64), bowl, kitchenScene.sceneButtons);
+    storageScene.addMoveButton(new PVector(285, 354), new PVector(64, 64), jarHint, jarHintPaper, notePickup);
+    cake = new Cake(new PVector(359, 250), new PVector(64, 64), bowl, kitchenScene.sceneButtons);
     kitchenScene.sceneButtons.add(cake);
 
     //Cook game initialization
     cake.itemsNeeded = cookItems;
-    kitchenScene.sceneButtons.add(new Oven(new PVector(576, 317), new PVector(32, 32), ovenHeat));
+    kitchenScene.sceneButtons.add(new Oven(new PVector(576, 317), new PVector(80, 64), ovenHeat));
     hideIngredients();
 
     //Text button initialization
     hallwayScene.addTextButton(new PVector(168, 192), new PVector(64, 64), magnifier, hallwayWoodBeam);
 
     //Load first scene
-    sceneManager.currentScene = introStory;
-    fullInventoryNotification.parentScene = introStory;
-    introStory.sceneTexts.add(fullInventoryNotification);
-    introTextBox.toggleRender();
+    sceneManager.currentScene = basementScene;
+    fullInventoryNotification.parentScene = basementScene;
+    basementScene.sceneTexts.add(fullInventoryNotification);
 
     //Pipe Game initialization
     for(int rows = 0; rows < gridHeight; rows++)
@@ -299,14 +306,8 @@ void setup()
     //JarGame Initialization
     correctJarOrder = new Jar[jarCount];
     randomJarOrder = new Jar[jarCount];
-    for(int i = 0; i < jarCount; i++)
-    {
-        correctJarOrder[i] = new Jar(new PVector(200, 200), i, jarImages[i]);
-    }
-    for(int i = 0; i < jarCount; i++)
-    {
-        scrambleJars(i);
-    }
+    for(int i = 0; i < jarCount; i++) correctJarOrder[i] = new Jar(new PVector(200, 200), i, jarImages[i]);
+    for(int i = 0; i < jarCount; i++) scrambleJars(i);
     moveRight = new JarButton(jarArrowRight, new PVector(700, 500));
     moveLeft = new JarButton(jarArrowLeft, new PVector(300, 500));
     selectedJar = null;
@@ -315,19 +316,41 @@ void setup()
 void draw() 
 {
     background(0);
-    if(gameState == GameState.Scenes) 
+    if(isGameplayTimerSet && millis() >= gameEndMilliseconds) 
     {
-        drawScenes();
-        fill(#2FAD87);
-        textAlign(RIGHT, CENTER);
-        textFont(baseFont, 24);
-        if(!(millis() >= gameEndMilliseconds)) text("Seconds left until daytime: " + (int)((gameEndMilliseconds - millis()) / 1000), 980, 20);
+        gameState = GameState.DeathMenu;
+        isGameplayTimerSet = false;
+        resetGame();
         return;
     }
-    if(gameState == GameState.PipeGame) {pipeGame(); return;}
-    if(gameState == GameState.JarGame) {jarGame(); return;}
-    if(gameState == GameState.MainMenu) {mainMenu(); return;}
-    if(gameState == GameState.WinMenu) {winMenu(); return;}
+    switch(gameState)
+    {
+        case Scenes:
+            drawScenes();
+            fill(#2FAD87);
+            textAlign(RIGHT, CENTER);
+            textFont(baseFont, 24);
+            if(!(millis() >= gameEndMilliseconds)) text("Seconds left until daytime: " + (int)((gameEndMilliseconds - millis()) / 1000), 980, 20);
+            return;
+        case PipeGame:
+            pipeGame();
+            return;
+        case JarGame:
+            jarGame();
+            return;
+        case MainMenu:
+            mainMenu();
+            return;
+        case WinMenu:
+            winMenu();
+            return;
+        case StoryScreen:
+            storyScreen();
+            return;
+        case DeathMenu:
+            deathMenu();
+            return;
+    }
 }
 
 //Mouse click handling
@@ -341,7 +364,7 @@ void mousePressed()
                 sceneManager.mouseClick();
                 break;
             case PipeGame:
-                allowMouseClick = false;
+                if(mouseX < 975 && mouseX > 925 && mouseY < 575 && mouseY > 525) {sceneManager.loadScene(basementScene); gameState = GameState.Scenes;}
                 for(PipeHolder pH : pipeHolders)
                 {
                     if(pH.isOverHeldPipe() && !isPipeGameOver)
@@ -351,7 +374,8 @@ void mousePressed()
                 }
                 break;
             case JarGame:
-                if(!isJarGameOver)
+                if(mouseX < 975 && mouseX > 925 && mouseY < 575 && mouseY > 525) {sceneManager.loadScene(storageScene); gameState = GameState.Scenes;}
+                else if(!isJarGameOver)
                 {
                     if(isJarAvailable && moveRight.isOverJarButton()) {moveRight.moveRight(selectedJar.jarPosition);}
                     else if(isJarAvailable && moveLeft.isOverJarButton()) {moveLeft.moveLeft(selectedJar.jarPosition);}
@@ -371,12 +395,13 @@ void mousePressed()
                 break;
             case MainMenu:
             case WinMenu:
+            case StoryScreen:
+            case DeathMenu:
                 checkMenuClick();
                 break;
         }
     }
     allowMouseClick = false;
-    println("x: " + mouseX + " | " + "y: " + mouseY);
 }
 void mouseReleased()
 {
@@ -386,17 +411,6 @@ void mouseReleased()
 //PxC gameloop
 void drawScenes()
 {
-    if(millis() >= gameEndMilliseconds) 
-    {
-        sceneManager.loadScene(gameOverScene);
-        return;
-    }
-    if(sceneManager.currentScene == introStory) 
-    {
-        textAlign(CENTER, CENTER);
-        textFont(baseFont, 24);
-        text(introText[0], width/2, height/2);
-    }
     sceneManager.draw();
     inventory.drawInventory();
 }
@@ -405,40 +419,33 @@ void drawScenes()
 void pipeGame()
 {
     int correctCount = 0;
-    background(0);
-    image(pipeGameBackground, 0, 0, width, height);
-    for(PipeHolder pHolder : pipeHolders)
-    {
-        pHolder.drawHolder();
-    }
+    background(pipeGameBackground);
+    rectMode(CENTER);
+    fill(255, 0, 0, 128);
+    strokeWeight(4);
+    rect(950, 550, 50, 50);
+    imageMode(CENTER);
+    image(jarArrowDown, 950, 550, 40, 40);
+    imageMode(CORNER);
+    for(PipeHolder pHolder : pipeHolders) pHolder.drawHolder();
     for(int i = 0; i < pipeHolders.size(); i++)
     {
         PipeHolder pHolder = pipeHolders.get(i);
-        if(pipeSolutions[usedLayout][i] != -1 && pipeSolutions[usedLayout][i] == pHolder.heldPipe.pipeRotationNum)
-        {
-            correctCount++;
-        }
+        if(pipeSolutions[usedLayout][i] != -1 && pipeSolutions[usedLayout][i] == pHolder.heldPipe.pipeRotationNum) correctCount++;
     }
     if(correctCount == correctCountAmount[usedLayout])
     {
         isPipeGameOver = true;
         if(!isDelaySet) {setupDelay((int)(pipeGameVictory.duration())); pipeGameVictory.play(); correctChime.play();}
-        if(isDelayOver())
+        else if(isDelayOver())
         {
             sceneManager.loadScene(basementScene);
             gameState = GameState.Scenes;
             basementScene.sceneButtons.remove(1);
             isDelaySet = false;
+            basementScene.addItemButton(new PVector(753, 319), new PVector(64, 64), pipeKey, true);
+            pipeTextBox.toggleRender();
             basementScene.background = basementCompletedBackground;
-            if(inventory.allowItemPickup)
-            {
-                inventory.heldItems.add(pipeKey);
-                keysPickup.play();
-            }
-            else
-            {
-                basementScene.addItemButton(new PVector(570, 215), new PVector(64, 64), pipeKey, true);
-            }
         }
     }
 }
@@ -446,39 +453,36 @@ void pipeGame()
 //JarGame gameloop
 void jarGame()
 {
-    background(128);
-    for(Jar jar : correctJarOrder)
-    {
-        jar.drawJar();
-    }
+    background(jarGameBackground);
+    rectMode(CENTER);
+    fill(255, 0, 0, 128);
+    strokeWeight(4);
+    rect(950, 550, 50, 50);
+    imageMode(CENTER);
+    image(jarArrowDown, 950, 550, 40, 40);
+    imageMode(CORNER);
+    for(Jar jar : correctJarOrder) jar.drawJar();
     if(selectedJar != null)
     {
         isJarAvailable = true;
         moveRight.drawArrow();
         moveLeft.drawArrow();
     }
-    else
-    {
-        isJarAvailable = false;
-    }
+    else isJarAvailable = false;
     int correctCount = 0;
-    for(Jar jar : correctJarOrder)
-    {
-        if(jar.isInCorrectSpot == true) correctCount++;
-    }
-    textAlign(CENTER, CENTER);
+    for(Jar jar : correctJarOrder) if(jar.isInCorrectSpot == true) correctCount++;
     if(correctCount == 5)
     {
         isJarGameOver = true;
         selectedJar = null;
-        if(!isDelaySet) {setupDelay(3); correctChime.play();}
+        if(!isDelaySet) {setupDelay(1); correctChime.play();}
         if(isDelayOver())
         {
             sceneManager.loadScene(storageScene);
             gameState = GameState.Scenes;
             storageScene.sceneButtons.remove(1);
             isDelaySet = false;
-            storageScene.addItemButton(new PVector(535, 415), new PVector(64, 64), jarKey, true);
+            storageScene.addItemButton(new PVector(553, 465), new PVector(64, 64), jarKey, true);
             cleanerTextbox.toggleRender();
             whisper.play();
         }
@@ -493,6 +497,42 @@ void scrambleJars(int index)
     while(randomJarOrder[randomArrayIndex] != null);
     randomJarOrder[randomArrayIndex] = correctJarOrder[correctArrayIndex];
     randomJarOrder[randomArrayIndex].jarPosition = randomArrayIndex;
+}
+
+
+void checkMenuClick()
+{
+    switch(gameState)
+    {
+        case StoryScreen:
+            gameState = GameState.Scenes;
+            startGameplayTimer();
+            mainMenuMusic.stop();
+            gameMusic.loop();
+            break;
+        case MainMenu:
+            if(isHowToPlay && mouseX < backButtonPosition.x + 100/2 && mouseX > backButtonPosition.x - 100/2 && mouseY < backButtonPosition.y + 50/2 && mouseY > backButtonPosition.y - 50/2) isHowToPlay = false;
+            else if(!isHowToPlay && mouseX < playButtonPosition.x + 250/2 && mouseX > playButtonPosition.x - 250/2 && mouseY < playButtonPosition.y + 70/2 && mouseY > playButtonPosition.y - 70/2) 
+            {
+                gameState = GameState.StoryScreen;
+                isStoryScreen = true;
+            }
+            else if(!isHowToPlay && mouseX < howToButtonPosition.x + 150/2 && mouseX > howToButtonPosition.x - 150/2 && mouseY < howToButtonPosition.y + 50/2 && mouseY > howToButtonPosition.y - 50/2) isHowToPlay = true;
+            break;
+        case WinMenu:
+            if(mouseX < mainmenuButtonPosition.x + 180/2 && mouseX > mainmenuButtonPosition.x - 180/2 && mouseY < mainmenuButtonPosition.y + 50/2 && mouseY > mainmenuButtonPosition.y - 50/2)
+            {
+                resetGame();
+                gameState = GameState.MainMenu;
+                isWinMenu = false;
+            }
+            else if(mouseX < quitButtonPosition.x + 180/2 && mouseX > quitButtonPosition.x - 180/2 && mouseY < quitButtonPosition.y + 50/2 && mouseY > quitButtonPosition.y - 50/2) exit();
+            break;
+        case DeathMenu:
+            resetGame();
+            gameState = GameState.MainMenu;
+            break;
+    }
 }
 
 //Main Menu logic
@@ -542,35 +582,6 @@ void mainMenu()
     }
 }
 
-void checkMenuClick()
-{
-    if(isHowToPlay && mouseX < backButtonPosition.x + 100/2 && mouseX > backButtonPosition.x - 100/2 && mouseY < backButtonPosition.y + 50/2 && mouseY > backButtonPosition.y - 50/2)
-    {
-        isHowToPlay = false;
-    }
-    if(!isHowToPlay && mouseX < playButtonPosition.x + 250/2 && mouseX > playButtonPosition.x - 250/2 && mouseY < playButtonPosition.y + 70/2 && mouseY > playButtonPosition.y - 70/2)
-    {
-        gameState = GameState.Scenes;
-        startGameplayTimer();
-        mainMenuMusic.stop();
-        gameMusic.loop();
-    }
-    else if(!isHowToPlay && mouseX < howToButtonPosition.x + 150/2 && mouseX > howToButtonPosition.x - 150/2 && mouseY < howToButtonPosition.y + 50/2 && mouseY > howToButtonPosition.y - 50/2)
-    {
-        isHowToPlay = true;
-    }
-    if(isWinMenu && mouseX < mainmenuButtonPosition.x + 180/2 && mouseX > mainmenuButtonPosition.x - 180/2 && mouseY < mainmenuButtonPosition.y + 50/2 && mouseY > mainmenuButtonPosition.y - 50/2)
-    {
-        resetGame();
-        gameState = GameState.MainMenu;
-        isWinMenu = false;
-    }
-    if(isWinMenu && mouseX < quitButtonPosition.x + 180/2 && mouseX > quitButtonPosition.x - 180/2 && mouseY < quitButtonPosition.y + 50/2 && mouseY > quitButtonPosition.y - 50/2)
-    {
-        exit();
-    }
-}
-
 void winMenu()
 {
     gameMusic.stop();
@@ -594,22 +605,38 @@ void winMenu()
     text("Quit", quitButtonPosition.x, quitButtonPosition.y);
 }
 
+void storyScreen()
+{
+    background(mainMenuBackground);
+    rectMode(CENTER);
+    strokeWeight(2);
+    fill(128, 128, 128, 225);
+    rect(width/2, height/2, 760, 400);
+    textAlign(CENTER, CENTER);
+    textFont(baseFont, 24);
+    fill(0);
+    text(introText[0], width/2, height/2, 740, 400);
+}
+
+void deathMenu()
+{
+    background(deathBackground);
+    textAlign(CENTER, CENTER);
+    textFont(baseFont, 24);
+    fill(255);
+    text("Click to return to main menu", width/2, 580);
+}
+
 void resetGame()
 {
     sceneManager.loadScene(basementScene);
     basementScene.background = basementScatteredBackground;
     basementScene.addMoveButton(new PVector(455, 225), new PVector(64, 64), pipeHint, pipeHintPaper, notePickup);
-    storageScene.addMoveButton(new PVector(265, 300), new PVector(64, 64), jarHint, jarHintPaper, notePickup);
+    storageScene.addMoveButton(new PVector(285, 354), new PVector(64, 64), jarHint, jarHintPaper, notePickup);
     correctJarOrder = new Jar[jarCount];
     randomJarOrder = new Jar[jarCount];
-    for(int i = 0; i < jarCount; i++)
-    {
-        correctJarOrder[i] = new Jar(new PVector(200, 200), i, jarImages[i]);
-    }
-    for(int i = 0; i < jarCount; i++)
-    {
-        scrambleJars(i);
-    }
+    for(int i = 0; i < jarCount; i++) correctJarOrder[i] = new Jar(new PVector(200, 200), i, jarImages[i]);
+    for(int i = 0; i < jarCount; i++) scrambleJars(i);
     selectedJar = null;
     for(int i = 0; i < pipeHolders.size(); i++)
     {
@@ -626,7 +653,7 @@ void resetGame()
     }
     isPipeGameOver = false;
     isJarGameOver = false;
-    cake = new Cake(new PVector(330, 280), new PVector(64, 64), bowl, kitchenScene.sceneButtons);
+    cake = new Cake(new PVector(359, 250), new PVector(64, 64), bowl, kitchenScene.sceneButtons);
     kitchenScene.sceneButtons.add(cake);
     cake.itemsNeeded = cookItems;
     hideIngredients();
@@ -646,19 +673,17 @@ void setupDelay(int secondsToDelay)
 void startGameplayTimer()
 {
     gameEndMilliseconds = millis() + gameplaySeconds * 1000;
+    isGameplayTimerSet = true;
 }
 
 void hideIngredients()
 {
     IntList randomIndexes = new IntList();
-    for(int i = 0; i < 5; i++)
-    {
-        randomIndexes.append(i);
-    }
+    for(int i = 0; i < 5; i++) randomIndexes.append(i);
     randomIndexes.shuffle();
-    basementScene.addItemButton(new PVector(875, 345), new PVector(64, 64),cookItems[randomIndexes.get(0)], false);
+    basementScene.addItemButton(new PVector(957, 374), new PVector(64, 64),cookItems[randomIndexes.get(0)], false);
     kitchenScene.addItemButton(new PVector(373, 67), new PVector(64, 64),cookItems[randomIndexes.get(1)], false);
-    storageScene.addItemButton(new PVector(685, 315), new PVector(64, 64),cookItems[randomIndexes.get(2)], false);
-    storageScene.addItemButton(new PVector(275, 65), new PVector(64, 64),cookItems[randomIndexes.get(3)], false);
+    storageScene.addItemButton(new PVector(676, 371), new PVector(64, 64),cookItems[randomIndexes.get(2)], false);
+    storageScene.addItemButton(new PVector(365, 96), new PVector(64, 64),cookItems[randomIndexes.get(3)], false);
     hallwayScene.addItemButton(new PVector(50, 440), new PVector(64, 64),cookItems[randomIndexes.get(4)], false);
 }

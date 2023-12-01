@@ -18,7 +18,7 @@ class Jar
     void drawJar()
     {
         position.x = jarPosition * 100 + (jarPosition * 50) + 200;
-        position.y = height/2 - jarSize.y/2;
+        position.y = 415 - jarSize.y/2;
         fill(255, 255, 255, 255);
         imageMode(CENTER);
         image(jarIcon, position.x, position.y, jarSize.x, jarSize.y);

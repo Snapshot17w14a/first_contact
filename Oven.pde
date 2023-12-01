@@ -12,7 +12,7 @@ class Oven extends Button
     void drawButton()
     {
         fill(255, 255, 255, 255);
-        image(ovenIcon, buttonPosition.x - buttonSize.x/2, buttonPosition.y - buttonSize.y/2, 32, 32);
+        image(ovenIcon, buttonPosition.x - buttonSize.x/2, buttonPosition.y - buttonSize.y/2, buttonSize.x, buttonSize.y);
     }
 
     void buttonAction()
@@ -22,6 +22,6 @@ class Oven extends Button
             cookKeyFound.toggleRender();
             inventory.heldItems.add(cookKey);
         }
-        else missingIngredients.toggleRender();
+        else missingBowl.toggleRender();
     }
 }

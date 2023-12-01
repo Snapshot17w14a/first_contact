@@ -22,15 +22,15 @@ class Inventory
         for(int i = 0; i < slotCount; i++)
         {
             int yPos = (i * boxSize) + yOffset * (i + 1);
-            rectMode(CORNER);
-            rect(xPos, yPos, boxSize, boxSize, 10);
+            imageMode(CORNER);
+            image(inventoryImage, xPos, yPos, boxSize, boxSize);
         }
         int loopCount = min(heldItems.size(), slotCount);
         for(int i = 0; i < loopCount; i++)
         {
             Item item = heldItems.get(i);
             int yPos = (i * boxSize) + yOffset * (i + 1);
-            image(item.itemImage, xPos, yPos, boxSize, boxSize);
+            image(item.itemImage, xPos+8, yPos+8, boxSize-16, boxSize-16);
         }
     }
 
